@@ -38,7 +38,7 @@ namespace Proyecto_LFA
             {
                 if (Helpers.ArchivoVacio(txbRuta.Text) != false) //el archivo no esta vacio
                 {
-                    Helpers.LeerArchivo(txbRuta.Text);//LOGICA PARA LECTURA DEL ARCHIVO
+                    Prueba.LeerArchivo(txbRuta.Text);//LOGICA PARA LECTURA DEL ARCHIVO
                 }
                 else
                 {

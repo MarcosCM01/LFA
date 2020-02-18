@@ -40,7 +40,6 @@ namespace Proyecto_LFA
                     //ANALIZO LA PRIMER PALABRA---> que SETS y TOKENS esten correctamente escritas
                     if (linea.Length > 0 && bandera_Inicio == false)
                     {
-                        bandera_Inicio = true;
                         switch (linea[0])
                         {
                             case 'S':
@@ -57,16 +56,31 @@ namespace Proyecto_LFA
                                 }
                                 letra_Inicio = 'T';
                                 break;
+                            default:
+                                MostrarError(no_lineaError, no_columnaError);
+                                break;
                         }
                     }
 
-                    //if (linea.Length > 0 && bandera_Inicio == true)
-                    //{
-
-                    //}
-                    
+                    if (linea.Length > 0 && bandera_Inicio == true)
+                    {
+                        var contador_SETS = 0;
+                        switch (letra_Inicio)
+                        {
+                            //QUE CUMPLA CARACTERISTICAS DE UN SET
+                            case 'S': 
+                               break;
+                            case 'T':
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    bandera_Inicio = true;
                 }
+                reader.Close();
             }
+            
         }
         public static bool Analizador_Reservada(char[] reservada, char[] linea, int contador, ref int no_columnaError) 
         {
