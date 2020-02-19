@@ -125,7 +125,10 @@ namespace Proyecto_LFA
                 var linea_TMP = archivo[posicionActual].ToCharArray();
                 var verificador_Estructura = true; //variable que vea que tenga: LETRA = TERMINALES
                 var contador_Letras = 0;
+                var contador_CharSETS = 0;
                 var igual_Encontrado = false;
+                var flag_segundoPunto = false;
+                var flag_Cierra = false;
                 for (int i = 0; i < linea_TMP.Length; i++)
                 {
                     if (char.IsLetter(linea_TMP[i]) && igual_Encontrado == false)
@@ -134,20 +137,36 @@ namespace Proyecto_LFA
                     }
                     switch (linea_TMP[i])
                     {
-                        case ' ':
-                            no_columnaError++;
+                        case '.':
+                            if (i == 0 || i == linea_TMP.Length - 1)// verifico: No sea el primero o el ultimo
+                            {  
+                                verificador_Estructura = false;
+                            }
+                            if (i + 1 < linea_TMP.Length)
+                            {
+                                if (linea_TMP[i + 1] != '.' && flag_segundoPunto == false)//verifico primer punto y segundo punto
+                                {
+                                    verificador_Estructura = false;
+                                }
+                                if (linea_TMP[i + 1] == '.' && flag_segundoPunto == false)//Si hay concatenado mas de 2 puntos
+                                {
+                                    flag_segundoPunto = true;
+                                }
+                            }
                             break;
                         case '=':
-                            igual_Encontrado = true;
-                            no_columnaError++;
-                            if (i == 0 || i == linea_TMP.Length - 1 || contador_Letras == 0)// verifico que no sea el primero o el ultimo (si es asi, falta el ID o la definicion)
+                            if (i == 0 || i == linea_TMP.Length - 1 || contador_Letras == 0 || igual_Encontrado == true)// verifico que no sea el primero o el ultimo (si es asi, falta el ID o la definicion)
                             {
                                 verificador_Estructura = false;
                             }
+                            igual_Encontrado = true;
                             break;
                         case '\'':
-                            no_columnaError++;
-                            if (i + 2 <= linea_TMP.Length)
+                            if (i == 0 || i == linea_TMP.Length) //si es el primero o el ultimo
+                            {
+                                verificador_Estructura = false;
+                            }
+                            if (i + 2 < linea_TMP.Length)
                             {
                                 if (char.IsLetterOrDigit(linea_TMP[i + 1]) == false || linea_TMP[i + 2] != '\'')
                                 {
@@ -156,10 +175,17 @@ namespace Proyecto_LFA
                             }
                             break;
                         case '+':
-                            no_columnaError++;
                             if (i == 0 || i == linea_TMP.Length) // si es el primero o el ultimo
                             {
                                 verificador_Estructura = false;
+                                break;
+                            }
+                            if (i-1 > 0 && i+1 < linea_TMP.Length)// si no tiene comillas a la izquierda o derecha
+                            {
+                                if (linea_TMP[i-1] != '\'' && linea_TMP[i+1] != '\'')
+                                {
+                                    verificador_Estructura = false;
+                                }
                             }
                             if (i - 5 > 0)//para que venga el mas, debe de estar concatenado antes por ..
                             {
@@ -169,9 +195,35 @@ namespace Proyecto_LFA
                                 }
                             }
                             break;
+                        case '(':
+                            if (i == 0 || i == linea_TMP.Length)
+                            {
+                                verificador_Estructura = false;
+                                break;
+                            }
+                            var x = i+1;
+                            while (x < linea_TMP.Length)
+                            {
+                                if (char.IsDigit(linea_TMP[x]) != true)
+                                {
+                                    verificador_Estructura = false;
+                                }
+                                else
+                                {
+                                    contador_CharSETS++;
+                                }
+                                if (linea_TMP[x]== ')')
+                                {
+                                    flag_Cierra = true;
+                                }
+                                x++;
+                            }
+                            break;
                     }
+                    no_columnaError++;
                     cont_SETS++;
                 }
+                igual_Encontrado = false;
                 posicionActual++;
                 //caso de que no tenga error el set
                 if (verificador_Estructura != true)
