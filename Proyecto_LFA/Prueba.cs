@@ -196,15 +196,20 @@ namespace Proyecto_LFA
                             }
                             break;
                         case '(':
-                            if (i == 0 || i == linea_TMP.Length)
+                            if (i == 0 || i == linea_TMP.Length || igual_Encontrado == false || i-3 <=0)//que no sea el primero o el ultimo
+                            {
+                                verificador_Estructura = false;
+                                break;
+                            }
+                            if (linea_TMP[i-3] != 'C' && linea_TMP[i - 2] != 'H' && linea_TMP[i - 3] != 'R')
                             {
                                 verificador_Estructura = false;
                                 break;
                             }
                             var x = i+1;
-                            while (x < linea_TMP.Length)
+                            while (flag_Cierra == false || x < linea_TMP.Length)
                             {
-                                if (char.IsDigit(linea_TMP[x]) != true)
+                                if (char.IsDigit(linea_TMP[x]) != true || linea_TMP[i+1] == ')')//que no sea digito o que no tenga nada adentro
                                 {
                                     verificador_Estructura = false;
                                 }
@@ -212,11 +217,15 @@ namespace Proyecto_LFA
                                 {
                                     contador_CharSETS++;
                                 }
-                                if (linea_TMP[x]== ')')
+                                if (linea_TMP[x]== ')' && contador_CharSETS>0)
                                 {
                                     flag_Cierra = true;
                                 }
                                 x++;
+                            }
+                            if (flag_Cierra == false)
+                            {
+                                verificador_Estructura = false;
                             }
                             break;
                     }
