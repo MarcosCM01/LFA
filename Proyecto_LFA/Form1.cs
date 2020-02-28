@@ -31,11 +31,12 @@ namespace Proyecto_LFA
         {
             Application.Exit();
         }
-
-        public static string expresionR_SETS = "( *.L+. *.=. *.('.S.'|C.H.R.\\(.N+.\\)).((\\..\\.|\\+).('.S.'|C.H.R.\\(.N+.\\)))*)";
-        public static string expresionR_TOKENS = " *TOKEN +N+ *= *(('?S'?|L+) *)+";
-        public static string expresionR_ACTIONS = " *N+ *= *'L+'";
-        public static string expresionR_ERROR = " *ERROR *= *N+";
+        //EXPRESIONES REGULARES
+        public static string expresionR_SETS = "( *.L+. *.=. *.(('.S.')|(C.H.R.\\(.N+.\\))).(((\\..\\.)|\\+).(('.S.')|(C.H.R.\\(.N+.\\))))*)";
+        public static string expresionR_TOKENS = "( *.T.O.K.E.N. +.N+. *.=. *.((('?.S.'?)|L+). *)+)";
+        public static string expresionR_ACTIONS = "( *.N+. *.=. *.'.L+.')";
+        public static string expresionR_ERROR = "( *.E.R.R.O.R. *.=. *.N+)";
+        //LISTAS PARA ALMACENAR LOS SIMBOLOS TERMINALES Y OPERADORES
         public static List<char> operadores = new List<char>();
         public static List<char> st_SETS = new List<char>();
         public static List<char> st_TOKENS = new List<char>();
@@ -53,18 +54,20 @@ namespace Proyecto_LFA
 
                     //GENERACION DE LISTAS ST
                     Expresiones_Regulares.Generar_ST(operadores, st_SETS, expresionR_SETS);
-                    //Expresiones_Regulares.Generar_ST(operadores, st_TOKENS, expresionR_TOKENS);
-                    //Expresiones_Regulares.Generar_ST(operadores, st_ACTIONS, expresionR_ACTIONS);
-                    //Expresiones_Regulares.Generar_ST(operadores, st_ERROR, expresionR_ERROR);
+                    Expresiones_Regulares.Generar_ST(operadores, st_TOKENS, expresionR_TOKENS);
+                    Expresiones_Regulares.Generar_ST(operadores, st_ACTIONS, expresionR_ACTIONS);
+                    Expresiones_Regulares.Generar_ST(operadores, st_ERROR, expresionR_ERROR);
 
                     //GENERAR DICCIONARIO SOBRE VALORES DE PRECEDENCIA
                     Arbol_Expresiones.LlenarDiccionarioPrecedencia(operadores);
 
                     //GENERACION DE ARBOLES DE EXPRESION
-                    //PARA SETS
-                    Arbol_Expresiones.GenerarArbol(st_SETS, operadores, expresionR_SETS);
+                    var arbol_SETS = Arbol_Expresiones.GenerarArbol(st_SETS, operadores, expresionR_SETS);
+                    var arbol_TOKENS = Arbol_Expresiones.GenerarArbol(st_TOKENS, operadores, expresionR_TOKENS);
+                    var arbol_ACTIONS = Arbol_Expresiones.GenerarArbol(st_ACTIONS, operadores, expresionR_ACTIONS);
+                    var arbol_ERROR = Arbol_Expresiones.GenerarArbol(st_ERROR, operadores, expresionR_ERROR);
 
-                    Prueba.LeerArchivo(txbRuta.Text);//LOGICA PARA LECTURA DEL ARCHIVO
+                    Helpers.LeerArchivo(txbRuta.Text, arbol_SETS, arbol_TOKENS, arbol_ACTIONS, arbol_ERROR, operadores);//LOGICA PARA LECTURA DEL ARCHIVO
                 }
                 else
                 {

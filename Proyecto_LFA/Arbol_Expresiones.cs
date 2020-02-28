@@ -38,7 +38,7 @@ namespace Proyecto_LFA
                 }
             }
         }
-        public static void GenerarArbol(List<char> simbolos_T, List<char> operadores, string expresion_Regular)//El que quiero insertar, su papa, su valor
+        public static Nodo GenerarArbol(List<char> simbolos_T, List<char> operadores, string expresion_Regular)//El que quiero insertar, su papa, su valor
         {
             var array = expresion_Regular.ToCharArray();
             for (int i = 0; i < expresion_Regular.Length; i++)//mientras existan tokens en ER
@@ -121,6 +121,7 @@ namespace Proyecto_LFA
             }
             //COMPROBAR ARBOL MEDIANTE INORDEN
             In_Orden(pila_Arboles.Peek());
+            return pila_Arboles.Peek();
         }
 
         public static bool TopOp(List<char> operadores) 
