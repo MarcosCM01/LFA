@@ -72,12 +72,13 @@ namespace Proyecto_LFA
                             //ERROR---> FALTAN OPERANDOS
                         }
                         //VERIFICAR
-                        var temp = new Nodo(pila_Tokens.Peek()); //y convertirlo en arbol
-                        pila_Tokens.Pop();//hacer pop a T
-                        temp.hijo_derecho = pila_Arboles.Peek();//y convertirlo en hijo derecho de temp
-                        pila_Arboles.Pop();// hacer pop a S
-                        temp.hijo_izquierdo = pila_Arboles.Peek();//y convertirlo en hijo izquierdo de temp
-                        pila_Arboles.Pop();// hacer pop a S
+                        var temp = new Nodo(pila_Tokens.Pop()); //hacer pop a T y convertirlo en arbol
+                        var hijo_derecho = pila_Arboles.Pop();
+                        temp.hijo_derecho = hijo_derecho;//hacer pop a S y convertirlo en hijo derecho de temp
+                        hijo_derecho.padre = temp;
+                        var hijo_izq = pila_Arboles.Pop();
+                        temp.hijo_izquierdo = hijo_izq;//hacer pop a S y convertirlo en hijo izquierdo de temp
+                        hijo_izq.padre = temp;
                         pila_Arboles.Push(temp);//hacer push de temp en pila 
                     }
                     pila_Tokens.Pop();//hacer pop a T con ultimo dato
@@ -92,8 +93,9 @@ namespace Proyecto_LFA
                         {
                             //ERROR--> FALTAN OPERANDOS
                         }
-                        nodo.hijo_izquierdo = pila_Arboles.Peek();// y asignarlo como hijo izquierdo
-                        pila_Arboles.Pop();//hacer pop de S
+                        var hijo_izq = pila_Arboles.Pop();
+                        nodo.hijo_izquierdo = hijo_izq;// hacer pop de S y asignarlo como hijo izquierdo
+                        hijo_izq.padre = nodo;
                         pila_Arboles.Push(nodo);
                     }
                     else if(pila_Tokens.Count !=0 && pila_Tokens.Peek() != '(' && VerificarPrecedencia(expresion_Regular[i], operadores) != false)//sino si T no esta vacia y el top op en T != '('
@@ -103,8 +105,13 @@ namespace Proyecto_LFA
                         {
                             //ERROR= FALTAN OPERANDOS
                         }
-                        temp.hijo_derecho = pila_Arboles.Pop();
-                        temp.hijo_izquierdo = pila_Arboles.Pop();
+                        //AGREGAR PADRE
+                        var hijo_der = pila_Arboles.Pop();
+                        temp.hijo_derecho = hijo_der;
+                        hijo_der.padre = temp;
+                        var hijo_izq = pila_Arboles.Pop();
+                        temp.hijo_izquierdo = hijo_izq;
+                        hijo_izq.padre = temp;
                         pila_Arboles.Push(temp);
                         //sacar a op de T, volverlo arbol, llamarlo
 

@@ -15,6 +15,7 @@ namespace Proyecto_LFA
         public static List<string> gramatica = new List<string>();
         public static bool ArchivoVacio(string direccion)// verifica que el aechivo este vacio
         {
+            //var result = gramatica.Find(x => );
             FileInfo propiedades = new FileInfo(direccion);
             if (propiedades.Length >0)
             {
@@ -27,7 +28,7 @@ namespace Proyecto_LFA
             //variables auxiliares
             var line = string.Empty;
             var no_lineaError = 0;
-            var no_columnaError = 1;
+            var no_columnaError = 0;
             var primer_Caracter = new char();
             //LEO EL ARCHIVO
             using (StreamReader reader = new StreamReader(rutaFile))
@@ -66,9 +67,9 @@ namespace Proyecto_LFA
                 var linea = gramatica[i].ToCharArray();// linea es cada linea del documento
                 if (primer_Caracter== 'S')//HAY SETS-->
                 {
-                    while (!gramatica.Contains("TOKEN"))
+                    while (!gramatica[i].Contains("TOKEN"))//gramatica[i] == LINEA DEL ARCHIVO
                     {
-                        CompararArbol(arbol_Sets, gramatica[i], ref no_lineaError);
+                        CompararArbol(arbol_Sets, gramatica[i], ref no_columnaError, operadores);
                         i++;
                     }
                 }
@@ -100,9 +101,53 @@ namespace Proyecto_LFA
             }
         }
 
-        public static void CompararArbol(Nodo arbol, string linea, ref int linea_Error) 
-        { 
+        public static void CompararArbol(Nodo arbol, string linea, ref int columna, List<char> operadores) 
+        {
             //INORDEN
+            if (arbol != null)
+            {
+                CompararArbol(arbol.hijo_izquierdo, linea, ref columna, operadores);
+                //COMPARAR EL NODO
+                
+                if (arbol.padre.id == '*')//ES REPETITIVO
+                {
+                    while (linea[columna] != arbol.padre.id)//AVANZAR EN LOS ESPACIOS
+                    {
+                        if (linea[columna] == arbol.padre.id)
+                        {
+                            columna++;
+                        }
+                    }
+                    if (columna== 0)
+                    {
+
+                    }
+                }
+                else if (arbol.padre.id == '+')
+                {
+                    //BUSCAR EL SIMBOLO TERMINAL (ARBOL.ID) EN LA LISTA
+                    switch (arbol.id)
+                    {
+                        case 'L':
+                            while ( !char.IsLetter(linea[columna]))
+                            {
+                                columna++;
+                                //IF BANDERA_ERROR == TRUE ---> DEVOLVER ERROR
+                            }
+                            break;
+                        case 'C':
+                            if (linea[columna] != arbol.id)
+                            {
+                                //TIRAR ERROR
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    //YA TENIENDO EL SIMBOLO TERMINAL--> HAGO UN WHILE(!)
+                }
+                CompararArbol(arbol.hijo_derecho, linea, ref columna, operadores);
+            }
         }
         public static void MostrarError(int no_Linea, int no_columnaError) //CASO NO SE CUMPLIO LA GRAMATICA
         {
