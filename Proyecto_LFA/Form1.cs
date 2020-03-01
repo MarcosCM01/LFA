@@ -67,7 +67,7 @@ namespace Proyecto_LFA
                     var arbol_ACTIONS = Arbol_Expresiones.GenerarArbol(st_ACTIONS, operadores, expresionR_ACTIONS);
                     var arbol_ERROR = Arbol_Expresiones.GenerarArbol(st_ERROR, operadores, expresionR_ERROR);
 
-                    Helpers.LeerArchivo(txbRuta.Text, arbol_SETS, arbol_TOKENS, arbol_ACTIONS, arbol_ERROR, operadores);//LOGICA PARA LECTURA DEL ARCHIVO
+                    Helpers.LeerArchivo(txbRuta.Text, arbol_SETS, arbol_TOKENS, arbol_ACTIONS, arbol_ERROR);//LOGICA PARA LECTURA DEL ARCHIVO
                 }
                 else
                 {

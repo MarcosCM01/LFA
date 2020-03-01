@@ -8,11 +8,17 @@ using System.Windows.Forms;
 
 namespace Proyecto_LFA
 {
+    public class ERROR 
+    {
+        public static string mensajeError;
+    }
     public class Helpers
     {
         public static char[] reservada_SETS = { 'S', 'E', 'T', 'S'};//OPCIONAL QUE EXISTA
         public static char[] reservada_TOKENS = { 'T', 'O', 'K', 'E', 'N', 'S' };//TIENE QUE EXISTIR
-        public static List<string> gramatica = new List<string>();
+        public static char[] reservada_ACTIONS = { 'A', 'C', 'T', 'I', 'O', 'N', 'S' };//TIENE QUE EXISTIR
+        public static char[] reservada_RESERVADAS = { 'R', 'E', 'S', 'E', 'R', 'V', 'A', 'D', 'A','S' };//TIENE QUE EXISTIR
+        public static List<string> gramatica = new List<string>();//LISTA QUE ALMACENA EL ARCHIVO
         public static bool ArchivoVacio(string direccion)// verifica que el aechivo este vacio
         {
             //var result = gramatica.Find(x => );
@@ -23,11 +29,10 @@ namespace Proyecto_LFA
             }
             return false;
         }
-        public static void LeerArchivo(string rutaFile, Nodo arbol_Sets, Nodo arbol_Tokens, Nodo arbol_Actions, Nodo arbol_Error, List<char>operadores) 
+        public static void LeerArchivo(string rutaFile, Nodo arbol_Sets, Nodo arbol_Tokens, Nodo arbol_Actions, Nodo arbol_Error) 
         {
             //variables auxiliares
             var line = string.Empty;
-            var no_lineaError = 0;
             var no_columnaError = 0;
             var primer_Caracter = new char();
             //LEO EL ARCHIVO
@@ -35,7 +40,8 @@ namespace Proyecto_LFA
             {
                 while ((line = reader.ReadLine()) != null)
                 {
-                    gramatica.Add(line);
+                    
+                    gramatica.Add(line.Trim('\t'));
                 }
                 reader.Close();
             }
@@ -44,114 +50,279 @@ namespace Proyecto_LFA
             switch (primer_Linea[0])
             {
                 case 'S':
-                    if (Analizador_Reservada(reservada_SETS, primer_Linea, 1, ref no_columnaError) != true)
+                    if (Analizador_Reservada(reservada_SETS, primer_Linea, 0, ref no_columnaError, 1) != true)
                     { //si encuentra el error, me saca
-                        MostrarError(no_lineaError, no_columnaError);
+                        MostrarError(ERROR.mensajeError);
                     }
                     primer_Caracter = 'S';
                     break;
                 case 'T':
-                    if (Analizador_Reservada(reservada_TOKENS, primer_Linea, 1, ref no_columnaError) != true)
+                    if (Analizador_Reservada(reservada_TOKENS, primer_Linea, 0, ref no_columnaError, 1) != true)
                     {
-                        MostrarError(no_lineaError, no_columnaError);
+                        MostrarError(ERROR.mensajeError);
                     }
                     primer_Caracter = 'T';
                     break;
                 default:
-                    MostrarError(no_lineaError, no_columnaError);
+                    MostrarError(ERROR.mensajeError);
                     break;
             }
-            no_lineaError++;
-            for (int i = 1; i < gramatica.Count; i++)
+            var i = 1;
+            while(i < gramatica.Count)
             {
-                var linea = gramatica[i].ToCharArray();// linea es cada linea del documento
                 if (primer_Caracter== 'S')//HAY SETS-->
                 {
-                    while (!gramatica[i].Contains("TOKEN"))//gramatica[i] == LINEA DEL ARCHIVO
+                    //LOGICA PARA SETS
+                    while (!gramatica[i].Contains("TOKENS"))//gramatica[i] == LINEA DEL ARCHIVO
                     {
-                        CompararArbol(arbol_Sets, gramatica[i], ref no_columnaError, operadores);
+                        no_columnaError = 0;
+                        CompararArbol(arbol_Sets, gramatica[i], ref no_columnaError,Form1.st_SETS, i);
                         i++;
                     }
+                    while (!gramatica[i].Contains("ACTIONS"))//gramatica[i] == LINEA DEL ARCHIVO
+                    {
+                        no_columnaError = 0;
+                        CompararArbol(arbol_Tokens, gramatica[i], ref no_columnaError, Form1.st_TOKENS, i);
+                        i++;
+                    }
+                    no_columnaError = 0;
+                    if (Analizador_Reservada(reservada_ACTIONS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true)
+                    { //si encuentra el error, me saca
+                        i++;
+                        if (Analizador_Reservada(reservada_RESERVADAS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true)
+                        {
+                            i++;
+                            while (!gramatica[i].Contains("?"))
+                            {
+                                no_columnaError = 0;
+                                CompararArbol(arbol_Actions, gramatica[i], ref no_columnaError, Form1.st_ACTIONS, i);
+                                i++;
+                            }
+                        }
+                        else
+                        {
+                            MostrarError(ERROR.mensajeError);
+                        }
+                    }
+                    else
+                    {
+                        MostrarError(ERROR.mensajeError);
+                    }
+
                 }
                 else//EMPIEZA DESDE TOKENS
                 {
 
                 }
-                
-       
             }   
         }
-        public static bool Analizador_Reservada(char[] reservada, char[] linea, int contador, ref int no_columnaError) 
+        public static bool Analizador_Reservada(char[] reservada, char[] linea, int contador, ref int no_columnaError, int linea_Error) 
         {
             if (contador < reservada.Length)
             {
                 no_columnaError++;
                 if (linea[contador] == reservada[contador])
                 {
-                    return Analizador_Reservada(reservada, linea, contador + 1, ref no_columnaError);
+                    return Analizador_Reservada(reservada, linea, contador + 1, ref no_columnaError, linea_Error);
                 }
             }
             if (contador == reservada.Length)
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            ERROR.mensajeError = $"ERROR EN LA LINEA{linea_Error}, COLUMNA{no_columnaError}: NO VENIA {reservada[contador]}.";
+            return false;
         }
 
-        public static void CompararArbol(Nodo arbol, string linea, ref int columna, List<char> operadores) 
+        static bool bandera_IzquierdaOR = false;
+        static bool bandera_DerechaOR = true;
+        static bool bandera_interrogacion = false;
+        public static void CompararArbol(Nodo arbol, string linea, ref int columna, List<char>st, int linea_Error) 
         {
             //INORDEN
             if (arbol != null)
             {
-                CompararArbol(arbol.hijo_izquierdo, linea, ref columna, operadores);
+                CompararArbol(arbol.hijo_izquierdo, linea, ref columna, st, linea_Error);
                 //COMPARAR EL NODO
                 
-                if (arbol.padre.id == '*')//ES REPETITIVO
+                //CASO EN EL QUE SE LLEGO AL FIN DE LA LINEA Y ESTOY EN UNA HOJA
+                if (columna == linea.Length-1 && EsHoja(arbol) == true)
                 {
-                    while (linea[columna] != arbol.padre.id)//AVANZAR EN LOS ESPACIOS
+                    if (VerificarPadre(arbol, '*') == true)
                     {
-                        if (linea[columna] == arbol.padre.id)
+                        //SALIRME DEL METODO COMPARAR ARBOL
+                        
+                    }
+                    else
+                    {
+                        ERROR.mensajeError = $"ERROR EN LA LINEA{linea_Error}, COLUMNA{columna}: NO VENIA NUMERO.";
+                    }
+                }
+                else if (st.Contains(arbol.id) && EsHoja(arbol)!= false)//SIMBOLO TERMINAL Y HOJA--> LOS QUE HAY QUE ANALIZAR
+                {
+                    if (arbol.padre.id == '*')
+                    {
+                        while (linea[columna] == arbol.id)//AVANZAR EN LOS ESPACIOS
                         {
                             columna++;
                         }
                     }
-                    if (columna== 0)
+                    else if (arbol.padre.id == '?')
                     {
-
+                        var verificador = columna;
+                        while (linea[columna]== '?')
+                        {
+                            columna++;
+                            bandera_interrogacion = true;
+                        }
+                        if (columna - verificador > 1)
+                        {
+                            ERROR.mensajeError = $"ERROR EN LA LINEA{linea_Error}, COLUMNA{columna}: SE EXCEDIO EN LA CANTIDAD DE{arbol.id}.";
+                        }
+                    }
+                    else if (arbol.padre.id == '+')
+                    {
+                        //BUSCAR EL SIMBOLO TERMINAL (ARBOL.ID) EN LA LISTA
+                        var verificador = columna;
+                        switch (arbol.id)
+                        {
+                            case 'L':
+                                while (char.IsLetter(linea[columna]))
+                                {
+                                    columna++;
+                                }
+                                if (columna-verificador == 0)
+                                {
+                                    ERROR.mensajeError = $"ERROR EN LA LINEA{linea_Error}, COLUMNA{columna}: NO VENIA IDENTIFICADOR.";
+                                }
+                                break;
+                            case 'N':
+                                verificador = columna;
+                                while (char.IsNumber(linea[columna]))
+                                {
+                                    columna++;
+                                    //IF BANDERA_ERROR == TRUE ---> DEVOLVER ERROR
+                                }
+                                if (columna - verificador == 0)
+                                {
+                                    ERROR.mensajeError = $"ERROR EN LA LINEA{linea_Error}, COLUMNA{columna}: NO VENIA NUMERO.";
+                                }
+                                break;
+                        }
+                        //YA TENIENDO EL SIMBOLO TERMINAL--> HAGO UN WHILE(!)
+                    }
+                    else if (arbol.padre.id == '.')
+                    {
+                        var verificador = columna;
+                        var contador_Simbolos = 0;
+                        switch (arbol.id)
+                        {
+                            case 'S':
+                                if ((char.IsSymbol(linea[columna]) || char.IsLetterOrDigit(linea[columna]) && linea[columna+1] != 'H'))
+                                {
+                                    columna++;
+                                    contador_Simbolos++;
+                                }
+                                break;
+                        }
+                        if (contador_Simbolos == 0)
+                        {
+                            //SE HACE POR SI NO AVANZO--> NO ERA S O C
+                            if (columna - verificador == 0)
+                            {
+                                //SERIA PARA: =, ', C, H, R, (, ), ., +, E, R, O, T, K, N 
+                                if (linea[columna] == arbol.id)
+                                {
+                                    columna++;
+                                    if (VerificarPadre(arbol, '|') == true)
+                                    {
+                                        bandera_IzquierdaOR = true;
+                                        bandera_DerechaOR = false;
+                                    }
+                                }
+                                //if (bandera_IzquierdaOR == true && arbol.padre.padre.id == '|')
+                                //{
+                                //    var padre_Original = DevolverPadreInicial(arbol);
+                                //    bandera_IzquierdaOR = true;
+                                //    bandera_DerechaOR = false;
+                                //    CompararArbol(padre_Original.hijo_derecho, linea, ref columna, st, linea_Error);
+                                //}
+                                else if (linea[columna] != arbol.id)
+                                {
+                                    if (VerificarPadre(arbol, '|') == true && bandera_IzquierdaOR == false && bandera_DerechaOR == true)
+                                    {
+                                        //CASO QUE EL HIJO IZQUIERDO ESTA MALO Y EL DERECHO PUEDA ESTAR BUENO
+                                        bandera_IzquierdaOR = true;
+                                        var nodoOr = EncontrarNodoOR(arbol);//HIJO IZQ QUE TIENE COMO PADRE AL |
+                                        CompararArbol(nodoOr.hijo_derecho, linea, ref columna, st, linea_Error);
+                                    }
+                                }
+                                else
+                                {
+                                    ERROR.mensajeError = $"ERROR EN LA LINEA{linea_Error}, COLUMNA{columna}: SE ESPERABA UN {arbol.id}.";
+                                }
+                            }
+                        }
                     }
                 }
-                else if (arbol.padre.id == '+')
+                //CASO PARA EL | DONDE YA ANALIZO EL IZQUIERDO, Y ESTABA BUENO
+                else if (arbol.id == '|' && bandera_IzquierdaOR == true)
                 {
-                    //BUSCAR EL SIMBOLO TERMINAL (ARBOL.ID) EN LA LISTA
-                    switch (arbol.id)
-                    {
-                        case 'L':
-                            while ( !char.IsLetter(linea[columna]))
-                            {
-                                columna++;
-                                //IF BANDERA_ERROR == TRUE ---> DEVOLVER ERROR
-                            }
-                            break;
-                        case 'C':
-                            if (linea[columna] != arbol.id)
-                            {
-                                //TIRAR ERROR
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                    //YA TENIENDO EL SIMBOLO TERMINAL--> HAGO UN WHILE(!)
+                    DevolverPadreInicial(arbol);
+                    bandera_IzquierdaOR = false;
+                    bandera_DerechaOR = true;
+                    CompararArbol(arbol.hijo_derecho, linea, ref columna, st, linea_Error);
                 }
-                CompararArbol(arbol.hijo_derecho, linea, ref columna, operadores);
+                CompararArbol(arbol.hijo_derecho, linea, ref columna, st, linea_Error);
             }
         }
-        public static void MostrarError(int no_Linea, int no_columnaError) //CASO NO SE CUMPLIO LA GRAMATICA
+
+        public static bool EsHoja(Nodo nodo) 
         {
-            MessageBox.Show("ERROR EN EL ARCHIVO CARGADO, en la linea "+no_Linea +", columna " +no_columnaError);//AGREGAR no_Columna
+            if (nodo.hijo_derecho == null && nodo.hijo_izquierdo == null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        static bool bandera_PADRE = false;
+        public static bool VerificarPadre(Nodo nodo, char buscado) 
+        {
+            while (nodo.padre != null)
+            {
+                if (nodo.padre.id == buscado)
+                {
+                    bandera_PADRE = true;
+                }
+                return VerificarPadre(nodo.padre, buscado);
+            }
+            return bandera_PADRE;
+        }
+        public static Nodo EncontrarNodoOR(Nodo nodo) 
+        {
+            if (nodo.padre != null && nodo.padre.id != '|')
+            {
+                return EncontrarNodoOR(nodo.padre);
+            }
+            return nodo.padre;
+        }
+        public static Nodo DevolverPadreInicial(Nodo nodo) 
+        {
+            while (nodo.padre != null)
+            {
+                return DevolverPadreInicial(nodo.padre);
+            }
+            return nodo;
+        }
+        public static void ArchivoCorrecto() 
+        {
+            MessageBox.Show("ARCHIVO DE PRUEBA SIN NINGUN ERROR");
+        }
+        public static void MostrarError(string mensaje) //CASO NO SE CUMPLIO LA GRAMATICA
+        {
+            MessageBox.Show(mensaje);//AGREGAR no_Columna
+            //RETORNAR SIMBOLO QUE SE ESPERABA
         }
     }
 }
