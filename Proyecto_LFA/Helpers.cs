@@ -17,7 +17,7 @@ namespace Proyecto_LFA
         public static char[] reservada_SETS = { 'S', 'E', 'T', 'S'};//OPCIONAL QUE EXISTA
         public static char[] reservada_TOKENS = { 'T', 'O', 'K', 'E', 'N', 'S' };//TIENE QUE EXISTIR
         public static char[] reservada_ACTIONS = { 'A', 'C', 'T', 'I', 'O', 'N', 'S' };//TIENE QUE EXISTIR
-        public static char[] reservada_RESERVADAS = { 'R', 'E', 'S', 'E', 'R', 'V', 'A', 'D', 'A','S' };//TIENE QUE EXISTIR
+        public static char[] reservada_RESERVADAS = { 'R', 'E', 'S', 'E', 'R', 'V', 'A', 'D', 'A','S', '(', ')' };//TIENE QUE EXISTIR
         public static List<string> gramatica = new List<string>();//LISTA QUE ALMACENA EL ARCHIVO
         public static bool ArchivoVacio(string direccion)// verifica que el aechivo este vacio
         {
@@ -40,7 +40,6 @@ namespace Proyecto_LFA
             {
                 while ((line = reader.ReadLine()) != null)
                 {
-                    
                     gramatica.Add(line.Trim('\t'));
                 }
                 reader.Close();
@@ -64,85 +63,165 @@ namespace Proyecto_LFA
                     primer_Caracter = 'T';
                     break;
                 default:
+                    ERROR.mensajeError = $"ERROR EN LA LINEA {1}, COLUMNA {1}: NO VENIA LA DEFINICION CORRECTA DE TOKENS.";
                     MostrarError(ERROR.mensajeError);
                     break;
             }
             var i = 1;
-            while(i < gramatica.Count)
+            if (ERROR.mensajeError == null)//NO EXISTIO ERROR AL INICIO
             {
-                if (primer_Caracter== 'S')//HAY SETS-->
+                while (i < gramatica.Count)
                 {
-                    //LOGICA PARA SETS
-                    while (!gramatica[i].Contains("TOKENS"))//gramatica[i] == LINEA DEL ARCHIVO
+                    if (primer_Caracter == 'S')//HAY SETS-->
                     {
-                        no_columnaError = 0;
-                        CompararArbol(arbol_Sets, gramatica[i], ref no_columnaError,Form1.st_SETS, i);
-                        i++;
-                    }
-                    while (!gramatica[i].Contains("ACTIONS"))//gramatica[i] == LINEA DEL ARCHIVO
-                    {
-                        no_columnaError = 0;
-                        CompararArbol(arbol_Tokens, gramatica[i], ref no_columnaError, Form1.st_TOKENS, i);
-                        i++;
-                    }
-                    no_columnaError = 0;
-                    if (Analizador_Reservada(reservada_ACTIONS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true)
-                    { //si encuentra el error, me saca
-                        i++;
-                        if (Analizador_Reservada(reservada_RESERVADAS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true)
+                        //-------------------------------------------------LOGICA CUANDO INICIA CON SETS---------------------------------------------
+                        var inicio_Gramatica = i;
+                        while (!gramatica[i].Contains("TOKENS"))//gramatica[i] == LINEA DEL ARCHIVO
                         {
+                            no_columnaError = 0;
+                            CompararArbol(arbol_Sets, gramatica[i], ref no_columnaError, Form1.st_SETS, i);
                             i++;
-                            while (!gramatica[i].Contains("?"))
-                            {
-                                no_columnaError = 0;
-                                CompararArbol(arbol_Actions, gramatica[i], ref no_columnaError, Form1.st_ACTIONS, i);
-                                i++;
-                            }
                         }
-                        else
+                        if (i- inicio_Gramatica == 0)//ERROR. NO VINO NINGUN SET
                         {
+                            ERROR.mensajeError = $"ERROR EN LA LINEA {i}, COLUMNA {no_columnaError}: NO VENIA NINGUN SET DEFINIDO.";
                             MostrarError(ERROR.mensajeError);
                         }
-                    }
-                    else
-                    {
-                        MostrarError(ERROR.mensajeError);
-                    }
+                        inicio_Gramatica = i;
 
-                }
-                else//EMPIEZA DESDE TOKENS
-                {
-                    while (!gramatica[i].Contains("ACTIONS"))//gramatica[i] == LINEA DEL ARCHIVO
-                    {
-                        no_columnaError = 0;
-                        CompararArbol(arbol_Tokens, gramatica[i], ref no_columnaError, Form1.st_TOKENS, i);
-                        i++;
-                    }
-                    no_columnaError = 0;
-                    if (Analizador_Reservada(reservada_ACTIONS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true)
-                    { //si encuentra el error, me saca
-                        i++;
-                        if (Analizador_Reservada(reservada_RESERVADAS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true)
+                        while (!gramatica[i].Contains("ACTIONS"))
                         {
+                            no_columnaError = 0;
+                            CompararArbol(arbol_Tokens, gramatica[i], ref no_columnaError, Form1.st_TOKENS, i);
                             i++;
-                            while (!gramatica[i].Contains("?"))
+                        }
+                        if (i - inicio_Gramatica == 0)//ERROR. NO VINO NINGUN TOKEN
+                        {
+                            ERROR.mensajeError = $"ERROR EN LA LINEA {i}, COLUMNA {no_columnaError}: NO VENIA NINGUN TOKEN DEFINIDO DEFINIDO.";
+                            MostrarError(ERROR.mensajeError);
+                        }
+
+                        if (Analizador_Reservada(reservada_ACTIONS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true)
+                        {
+                            no_columnaError = 0;
+                            i++;
+                            if (Analizador_Reservada(reservada_RESERVADAS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true)
                             {
-                                no_columnaError = 0;
-                                CompararArbol(arbol_Actions, gramatica[i], ref no_columnaError, Form1.st_ACTIONS, i);
                                 i++;
+                                if (gramatica[i] == "{")
+                                {
+                                    i++;
+                                    var contador_Actions = i;
+                                    while (!gramatica[i].Contains("}") || i < gramatica.Count)
+                                    {
+                                        no_columnaError = 0;
+                                        CompararArbol(arbol_Actions, gramatica[i], ref no_columnaError, Form1.st_ACTIONS, i);
+                                        i++;
+                                    }
+                                    if (i- contador_Actions == 0 || i == gramatica.Count)
+                                    {
+                                        ERROR.mensajeError = $"ERROR EN LA LINEA {i}, COLUMNA {1}: NO VENIA LA LLAVE FINAL";
+                                        MostrarError(ERROR.mensajeError);
+                                    }
+                                }
+                                else
+                                {
+                                    ERROR.mensajeError = $"ERROR EN LA LINEA {i}, COLUMNA {1}: NO VENIA LA LLAVE INICIAL";
+                                    MostrarError(ERROR.mensajeError);
+                                }
+                            }
+                            else
+                            {
+                                ERROR.mensajeError = $"ERROR EN LA LINEA {i}, COLUMNA {no_columnaError}: NO VENIA LA PALABRA RESERVADAS ACOMPAÑANDO A ACTIONS.";
+                                MostrarError(ERROR.mensajeError);
                             }
                         }
                         else
                         {
+                            ERROR.mensajeError = $"ERROR EN LA LINEA {i}, COLUMNA {no_columnaError}: NO VENIA LA PALABRA ACTIONS O ESCRITA INCORRECTAMENTE.";
                             MostrarError(ERROR.mensajeError);
                         }
+
+                        if (i < gramatica.Count)
+                        {
+                            while (i < gramatica.Count)
+                            {
+                                no_columnaError = 0;
+                                CompararArbol(arbol_Error, gramatica[i], ref no_columnaError, Form1.st_ERROR, i);
+                                i++;
+                            }
+                        }
                     }
-                    else
+                    else//EMPIEZA DESDE TOKENS
                     {
-                        MostrarError(ERROR.mensajeError);
+                        var inicio_Gramatica = i;
+
+                        while (!gramatica[i].Contains("ACTIONS"))
+                        {
+                            no_columnaError = 0;
+                            CompararArbol(arbol_Tokens, gramatica[i], ref no_columnaError, Form1.st_TOKENS, i);
+                            i++;
+                        }
+                        if (i - inicio_Gramatica == 0)//ERROR. NO VINO NINGUN TOKEN
+                        {
+                            ERROR.mensajeError = $"ERROR EN LA LINEA {i}, COLUMNA {no_columnaError}: NO VENIA NINGUN TOKEN DEFINIDO DEFINIDO.";
+                            MostrarError(ERROR.mensajeError);
+                        }
+
+                        if (Analizador_Reservada(reservada_ACTIONS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true)
+                        {
+                            no_columnaError = 0;
+                            i++;
+                            if (Analizador_Reservada(reservada_RESERVADAS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true)
+                            {
+                                i++;
+                                if (gramatica[i] == "{")
+                                {
+                                    i++;
+                                    var contador_Actions = i;
+                                    while (!gramatica[i].Contains("}") || i < gramatica.Count)
+                                    {
+                                        no_columnaError = 0;
+                                        CompararArbol(arbol_Actions, gramatica[i], ref no_columnaError, Form1.st_ACTIONS, i);
+                                        i++;
+                                    }
+                                    if (i - contador_Actions == 0 || i == gramatica.Count)
+                                    {
+                                        ERROR.mensajeError = $"ERROR EN LA LINEA {i}, COLUMNA {1}: NO VENIA LA LLAVE FINAL";
+                                        MostrarError(ERROR.mensajeError);
+                                    }
+                                }
+                                else
+                                {
+                                    ERROR.mensajeError = $"ERROR EN LA LINEA {i}, COLUMNA {1}: NO VENIA LA LLAVE INICIAL";
+                                    MostrarError(ERROR.mensajeError);
+                                }
+                            }
+                            else
+                            {
+                                ERROR.mensajeError = $"ERROR EN LA LINEA {i}, COLUMNA {no_columnaError}: NO VENIA LA PALABRA RESERVADAS ACOMPAÑANDO A ACTIONS.";
+                                MostrarError(ERROR.mensajeError);
+                            }
+                        }
+                        else
+                        {
+                            ERROR.mensajeError = $"ERROR EN LA LINEA {i}, COLUMNA {no_columnaError}: NO VENIA LA PALABRA ACTIONS O ESCRITA INCORRECTAMENTE.";
+                            MostrarError(ERROR.mensajeError);
+                        }
+
+                        if (i < gramatica.Count)
+                        {
+                            while (i < gramatica.Count)
+                            {
+                                no_columnaError = 0;
+                                CompararArbol(arbol_Error, gramatica[i], ref no_columnaError, Form1.st_ERROR, i);
+                                i++;
+                            }
+                        }
                     }
                 }
-            }   
+            }
+               
         }
         public static bool Analizador_Reservada(char[] reservada, char[] linea, int contador, ref int no_columnaError, int linea_Error) 
         {
@@ -372,8 +451,8 @@ namespace Proyecto_LFA
         }
         public static void MostrarError(string mensaje) //CASO NO SE CUMPLIO LA GRAMATICA
         {
-            MessageBox.Show(mensaje);//AGREGAR no_Columna
-            //RETORNAR SIMBOLO QUE SE ESPERABA
+            MessageBox.Show(mensaje);
+            Application.Restart();
         }
     }
 }

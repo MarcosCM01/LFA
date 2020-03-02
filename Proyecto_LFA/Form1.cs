@@ -78,8 +78,6 @@ namespace Proyecto_LFA
             {
                 MessageBox.Show("Por favor, primero seleccione un archivo");
             }
-            
-            //El archivo no tiene nada
         }
     }
 }
