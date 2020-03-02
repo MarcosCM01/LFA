@@ -112,7 +112,35 @@ namespace Proyecto_LFA
                 }
                 else//EMPIEZA DESDE TOKENS
                 {
-
+                    while (!gramatica[i].Contains("ACTIONS"))//gramatica[i] == LINEA DEL ARCHIVO
+                    {
+                        no_columnaError = 0;
+                        CompararArbol(arbol_Tokens, gramatica[i], ref no_columnaError, Form1.st_TOKENS, i);
+                        i++;
+                    }
+                    no_columnaError = 0;
+                    if (Analizador_Reservada(reservada_ACTIONS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true)
+                    { //si encuentra el error, me saca
+                        i++;
+                        if (Analizador_Reservada(reservada_RESERVADAS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true)
+                        {
+                            i++;
+                            while (!gramatica[i].Contains("?"))
+                            {
+                                no_columnaError = 0;
+                                CompararArbol(arbol_Actions, gramatica[i], ref no_columnaError, Form1.st_ACTIONS, i);
+                                i++;
+                            }
+                        }
+                        else
+                        {
+                            MostrarError(ERROR.mensajeError);
+                        }
+                    }
+                    else
+                    {
+                        MostrarError(ERROR.mensajeError);
+                    }
                 }
             }   
         }
@@ -137,6 +165,7 @@ namespace Proyecto_LFA
         static bool bandera_IzquierdaOR = false;
         static bool bandera_DerechaOR = true;
         static bool bandera_interrogacion = false;
+        static Nodo nodo_Mas = new Nodo('#');
         public static void CompararArbol(Nodo arbol, string linea, ref int columna, List<char>st, int linea_Error) 
         {
             //INORDEN
@@ -144,6 +173,13 @@ namespace Proyecto_LFA
             {
                 CompararArbol(arbol.hijo_izquierdo, linea, ref columna, st, linea_Error);
                 //COMPARAR EL NODO
+                if (arbol.padre != null)
+                {
+                    if (arbol.padre.id == '+' && arbol.padre.padre.padre == null)
+                    {
+                        nodo_Mas = arbol.padre;
+                    }
+                }
                 
                 //CASO EN EL QUE SE LLEGO AL FIN DE LA LINEA Y ESTOY EN UNA HOJA
                 if (columna == linea.Length-1 && EsHoja(arbol) == true)
@@ -187,13 +223,16 @@ namespace Proyecto_LFA
                         switch (arbol.id)
                         {
                             case 'L':
-                                while (char.IsLetter(linea[columna]))
+                                if (bandera_IzquierdaOR == false)
                                 {
-                                    columna++;
-                                }
-                                if (columna-verificador == 0)
-                                {
-                                    ERROR.mensajeError = $"ERROR EN LA LINEA{linea_Error}, COLUMNA{columna}: NO VENIA IDENTIFICADOR.";
+                                    while (char.IsLetter(linea[columna]))
+                                    {
+                                        columna++;
+                                    }
+                                    if (columna - verificador == 0)
+                                    {
+                                        ERROR.mensajeError = $"ERROR EN LA LINEA{linea_Error}, COLUMNA{columna}: NO VENIA IDENTIFICADOR.";
+                                    }
                                 }
                                 break;
                             case 'N':
@@ -206,6 +245,12 @@ namespace Proyecto_LFA
                                 if (columna - verificador == 0)
                                 {
                                     ERROR.mensajeError = $"ERROR EN LA LINEA{linea_Error}, COLUMNA{columna}: NO VENIA NUMERO.";
+                                }
+                                break;
+                            case ' ':
+                                while (linea[columna] == ' ')
+                                {
+                                    columna++;
                                 }
                                 break;
                         }
@@ -265,15 +310,21 @@ namespace Proyecto_LFA
                         }
                     }
                 }
-                //CASO PARA EL | DONDE YA ANALIZO EL IZQUIERDO, Y ESTABA BUENO
+                //CASO PARA EL | DONDE YA ANALIZO EL IZQUIERDO, Y ESTABA BUENO (SETS)
                 else if (arbol.id == '|' && bandera_IzquierdaOR == true)
                 {
                     DevolverPadreInicial(arbol);
-                    bandera_IzquierdaOR = false;
-                    bandera_DerechaOR = true;
+                    //bandera_IzquierdaOR = false;
+                    //bandera_DerechaOR = true;
                     CompararArbol(arbol.hijo_derecho, linea, ref columna, st, linea_Error);
                 }
                 CompararArbol(arbol.hijo_derecho, linea, ref columna, st, linea_Error);
+                //FIN DE RECORRIDO
+                if (columna < linea.Length && nodo_Mas.id == '+')
+                    {
+                    nodo_Mas.id = '#';
+                    CompararArbol(nodo_Mas, linea, ref columna, st, linea_Error);
+                }
             }
         }
 
