@@ -32,8 +32,10 @@ namespace Proyecto_LFA
             Application.Exit();
         }
         //EXPRESIONES REGULARES
-        public static string expresionR_SETS = "( *.L+. *.=. *.(('.S.')|(C.H.R.\\(.N+.\\))).(((\\..\\.)|\\+).(('.S.')|(C.H.R.\\(.N+.\\))))*)";
-        public static string expresionR_TOKENS = "( *.T.O.K.E.N. +.N+. *.=. *.((('.S.')|L+). *)+)";
+        //"( *.L+. *.=. *.(('.S.')|(C.H.R.\\(.N+.\\))).(((\\..\\.)|\\+).(('.S.')|(C.H.R.\\(.N+.\\))))*)"
+        //"( *.T.O.K.E.N. *.N+. *.=. *.((('.S.')|S+). *)+)"
+        public static string expresionR_SETS = "( *.L+. *.=. *.(('.S.')|(C.H.R.\\(.N+.\\))).(((\\..\\.)|\\+).(('.S.')|(C.H.R.\\(.N+.\\))). *)*)";
+        public static string expresionR_TOKENS = "( *.T.O.K.E.N.Z*.N+.Z*.=.Z*.((('.S.')|S+). *)+)";
         public static string expresionR_ACTIONS = "( *.N+. *.=. *.'.L+.')";
         public static string expresionR_ERROR = "( *.E.R.R.O.R. *.=. *.N+)";
         //LISTAS PARA ALMACENAR LOS SIMBOLOS TERMINALES Y OPERADORES
@@ -47,7 +49,7 @@ namespace Proyecto_LFA
         {
             if (txbRuta.Text != "")// si no hay ruta del archivo
             {
-                if (Helpers.ArchivoVacio(txbRuta.Text) != false) //el archivo no esta vacio
+                if (Prueba.ArchivoVacio(txbRuta.Text) != false) //el archivo no esta vacio
                 {
                     //GENERAR LISTA DE OPERADORES 
                     Expresiones_Regulares.LlenarOP(operadores);
@@ -67,7 +69,7 @@ namespace Proyecto_LFA
                     var arbol_ACTIONS = Arbol_Expresiones.GenerarArbol(st_ACTIONS, operadores, expresionR_ACTIONS);
                     var arbol_ERROR = Arbol_Expresiones.GenerarArbol(st_ERROR, operadores, expresionR_ERROR);
 
-                    Helpers.LeerArchivo(txbRuta.Text, arbol_SETS, arbol_TOKENS, arbol_ACTIONS, arbol_ERROR);//LOGICA PARA LECTURA DEL ARCHIVO
+                    Prueba.LeerArchivo(txbRuta.Text, arbol_SETS, arbol_TOKENS, arbol_ACTIONS, arbol_ERROR);//LOGICA PARA LECTURA DEL ARCHIVO
                 }
                 else
                 {

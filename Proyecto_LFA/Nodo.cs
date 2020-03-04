@@ -12,6 +12,7 @@ namespace Proyecto_LFA
         public Nodo hijo_derecho { get; set; }
         public Nodo hijo_izquierdo { get; set; }
         public Nodo padre { get; set; } //Sirve para el metodo de eliminar
+        public bool recorrido { get; set; }
 
         public char  id { get; set; }//Nombre del farmaco
 
@@ -20,6 +21,7 @@ namespace Proyecto_LFA
             this.hijo_derecho = null;
             this.hijo_izquierdo = null;
             this.padre = null;
+            this.recorrido = false;
             id = value;
         }
     }

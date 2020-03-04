@@ -8,13 +8,22 @@ using System.Windows.Forms;
 
 namespace Proyecto_LFA
 {
+    public class MensajeError
+    {
+        public static string mensaje_Error;
+        public static bool error_Encontrado;
+    }
     public class Prueba
     {
         public static char[] reservada_SETS = { 'S', 'E', 'T', 'S' };//OPCIONAL QUE EXISTA
         public static char[] reservada_TOKENS = { 'T', 'O', 'K', 'E', 'N', 'S' };//TIENE QUE EXISTIR
-        public static List<string> lineas_Archivo = new List<string>();
+        public static char[] reservada_ACTIONS = { 'A', 'C', 'T', 'I', 'O', 'N', 'S' };//TIENE QUE EXISTIR
+        public static char[] reservada_RESERVADAS = { 'R', 'E', 'S', 'E', 'R', 'V', 'A', 'D', 'A', 'S', '(', ')' };//TIENE QUE EXISTIR
+        public static List<string> gramatica = new List<string>();//LISTA QUE ALMACENA EL ARCHIVO
+        public static List<string> ListaOriginal = new List<string>();//PARA LINEA DE ERROR
         public static bool ArchivoVacio(string direccion)// verifica que el aechivo este vacio
         {
+            //var result = gramatica.Find(x => );
             FileInfo propiedades = new FileInfo(direccion);
             if (propiedades.Length > 0)
             {
@@ -22,230 +31,520 @@ namespace Proyecto_LFA
             }
             return false;
         }
-        public static void LeerArchivo(string rutaFile)
+        public static bool SoloEspacios(string linea) 
+        {
+            var decide = false;
+            if (decide = linea.All(x => x == ' ') == true)
+            {
+                return true;
+            }
+            return false;
+        }
+        public static void LeerArchivo(string rutaFile, Nodo arbol_Sets, Nodo arbol_Tokens, Nodo arbol_Actions, Nodo arbol_Error)
         {
             //variables auxiliares
             var line = string.Empty;
-            var no_lineaError = 0;
-            var no_columnaError = 1;
-            var bandera_Inicio = false;
-            var letra_Inicio = ' ';
+            var no_columnaError = 0;
+            var primer_Caracter = new char();
+            //LEO EL ARCHIVO
             using (StreamReader reader = new StreamReader(rutaFile))
             {
                 while ((line = reader.ReadLine()) != null)
                 {
-                    lineas_Archivo.Add(line);
+                    ListaOriginal.Add(line);
+                    if (string.IsNullOrEmpty(line) == false) 
+                    {
+                        if (SoloEspacios(line) == false)
+                        {
+                            gramatica.Add(line.Trim('\t'));
+                        }
+                    }
                 }
                 reader.Close();
             }
-            for (int i = 0; i < lineas_Archivo.Count; i++)
+            var primer_Linea = gramatica[0].Trim(' ').ToCharArray();
+            //ANALIZO LA PRIMER PALABRA---> que SETS o TOKENS esten correctamente escritas
+            switch (primer_Linea[0])
             {
-                no_lineaError++;
-
-                var linea = lineas_Archivo[i].ToCharArray();// linea es cada linea del documento
-
-                //ANALIZO LA PRIMER PALABRA---> que SETS o TOKENS esten correctamente escritas
-                if (linea.Length > 0 && bandera_Inicio == false)
-                {
-                    switch (linea[0])
+                case 'S':
+                    if (Analizador_Reservada(reservada_SETS, primer_Linea, 0, ref no_columnaError, 1) != true)
+                    { //si encuentra el error, me saca
+                        MostrarError(MensajeError.mensaje_Error);
+                        MensajeError.error_Encontrado = true;
+                    }
+                    primer_Caracter = 'S';
+                    break;
+                case 'T':
+                    if (Analizador_Reservada(reservada_TOKENS, primer_Linea, 0, ref no_columnaError, 1) != true)
                     {
-                        case 'S':
-                            if (Analizador_Reservada(reservada_SETS, linea, ref no_columnaError) != true)
-                            { //si encuentra el error, me saca
-                                MostrarError(no_lineaError, no_columnaError);
-                                
-                            }
-                            no_columnaError = 1;
-                            letra_Inicio = 'S';
-                            break;
-                        case 'T':
-                            if (Analizador_Reservada(reservada_TOKENS, linea, ref no_columnaError) != true)
-                            {
-                                MostrarError(no_lineaError, no_columnaError);
-                            }
-                            no_columnaError = 1;
-                            letra_Inicio = 'T';
-                            break;
-                        default:
-                            MostrarError(no_lineaError, no_columnaError);
-                            break;
+                        MostrarError(MensajeError.mensaje_Error);
+                        MensajeError.error_Encontrado = true;
+                    }
+                    primer_Caracter = 'T';
+                    break;
+                default:
+                    MensajeError.mensaje_Error = $"ERROR AL INICIO DEL ARCHIVO: NO VENIA LA DEFINICION CORRECTA DE TOKENS.";
+                    MostrarError(MensajeError.mensaje_Error);
+                    MensajeError.error_Encontrado = true;
+                    break;
+            }
+            var i = 1;
+            if (MensajeError.error_Encontrado == false)//NO EXISTIO ERROR AL INICIO
+            {
+                var inicio_Gramatica = i;
+                if (primer_Caracter == 'S')//HAY SETS-->
+                {
+                    //-------------------------------------------------LOGICA CUANDO INICIA CON SETS---------------------------------------------
+                    while (gramatica[i].Contains("TOKENS") == false && MensajeError.error_Encontrado == false )//gramatica[i] == LINEA DEL ARCHIVO
+                    {
+                        var prueba = gramatica[i].Contains("TOKENS");
+                        no_columnaError = 0;
+                        var filtro = gramatica[i].ToCharArray();
+                        if (filtro[filtro.Length - 1] == '\'' || filtro[filtro.Length - 1] == ')' || filtro[filtro.Length - 1] == ' ')
+                        {
+                            CompararArbol(arbol_Sets, gramatica[i], ref no_columnaError, Form1.st_SETS, i);
+                            i++;
+                        }
+                        else
+                        {
+                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])+1}: DEFINICION INCOMPLETA O NO TERMINO CORRECTAMENTE LA ORACION";
+                            MensajeError.error_Encontrado = true;
+                            MostrarError(MensajeError.mensaje_Error);
+                        }
+                    }
+                    if (i - inicio_Gramatica == 0 && MensajeError.error_Encontrado == false)//ERROR. NO VINO NINGUN SET
+                    {
+                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, COLUMNA {1}: NO VENIA NINGUN SET DEFINIDO.";
+                        MensajeError.error_Encontrado = true;
+                        MostrarError(MensajeError.mensaje_Error);
+                    }
+                    inicio_Gramatica = i;
+                }
+                var LineaTokensLeida = false;
+                while (gramatica[i].Contains("ACTIONS") == false && MensajeError.error_Encontrado == false)
+                {
+                    if (LineaTokensLeida == false && primer_Caracter == 'S')
+                    {
+                        if (Analizador_Reservada(reservada_TOKENS, gramatica[i].ToCharArray(), 0, ref no_columnaError, 1) != true)
+                        {
+                            MostrarError(MensajeError.mensaje_Error);
+                            MensajeError.error_Encontrado = true;
+                        }
+                        LineaTokensLeida = true;
+                        i++;
+                    }
+                    else
+                    {
+                        no_columnaError = 0;
+                        var filtro = gramatica[i].ToCharArray();
+                        if (filtro[filtro.Length - 1] == '\'' || filtro[filtro.Length - 1] == '}' || filtro[filtro.Length - 1] == ' ' || filtro[filtro.Length - 1] == '*')
+                        {
+                            CompararArbol(arbol_Tokens, gramatica[i], ref no_columnaError, Form1.st_TOKENS, i);
+                            i++;
+                        }
+                        else
+                        {
+                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE EN LA COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
+                            MensajeError.error_Encontrado = true;
+                            MostrarError(MensajeError.mensaje_Error);
+                        }
+                        //if (filtro.Contains('(') && !filtro.Contains(')'))
+                        //{
+                        //    MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE EN LA COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
+                        //    MensajeError.error_Encontrado = true;
+                        //    MostrarError(MensajeError.mensaje_Error);
+                        //}
                     }
                 }
-            
-
-                if (linea.Length > 0 && bandera_Inicio == true)
+                if (i - inicio_Gramatica == 0 && MensajeError.error_Encontrado == false)//ERROR. NO VINO NINGUN TOKEN
                 {
-                    var contador_SETS = 0;
-                    switch (letra_Inicio)
+                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, COLUMNA {no_columnaError}: NO VENIA NINGUN TOKEN DEFINIDO DEFINIDO.";
+                    MensajeError.error_Encontrado = true;
+                    MostrarError(MensajeError.mensaje_Error);
+                }
+
+                if (Analizador_Reservada(reservada_ACTIONS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true && MensajeError.error_Encontrado == false)
+                {
+                    no_columnaError = 0;
+                    i++;
+                    if (Analizador_Reservada(reservada_RESERVADAS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true && MensajeError.error_Encontrado == false)
                     {
-                        //QUE CUMPLA CARACTERISTICAS DE UN SET
-                        case 'S':
-                            if (VerificadorSETS(ref contador_SETS, lineas_Archivo, i, ref no_columnaError) != true || contador_SETS == 0)
+                        i++;
+                        if (gramatica[i] == "{")
+                        {
+                            i++;
+                            var contador_Actions = i;
+                            while ((gramatica[i].Contains("}") == false && i < gramatica.Count) && MensajeError.error_Encontrado == false)
                             {
-                                MostrarError(no_lineaError, no_columnaError);
+                                no_columnaError = 0;
+                                var filtro = gramatica[i].ToCharArray();
+                                if (filtro[filtro.Length - 1] == '\'' )
+                                {
+                                    CompararArbol(arbol_Actions, gramatica[i], ref no_columnaError, Form1.st_ACTIONS, i);
+                                    i++;
+                                }
+                                else
+                                {
+                                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
+                                    MensajeError.error_Encontrado = true;
+                                    MostrarError(MensajeError.mensaje_Error);
+                                }
                             }
-                            
-                            break;
-                        case 'T':
-                            break;
-                        default:
-                            break;
+                            if (i - contador_Actions == 0 || i == gramatica.Count && MensajeError.error_Encontrado == false)
+                            {
+                                MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, COLUMNA {1}: NO VENIA LA LLAVE FINAL";
+                                MensajeError.error_Encontrado = true;
+                                MostrarError(MensajeError.mensaje_Error);
+                            }
+                        }
+                        if (gramatica[i] == "}")
+                        {
+                            i++;
+                        }
+                        else if (MensajeError.error_Encontrado == false)
+                        {
+                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {1}: NO VENIA LA LLAVE INICIAL";
+                            MensajeError.error_Encontrado = true;
+                            MostrarError(MensajeError.mensaje_Error);
+                        }
+                    }
+                    else if (MensajeError.error_Encontrado == false)
+                    {
+                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {no_columnaError}: NO VENIA LA PALABRA RESERVADAS ACOMPAÑANDO A ACTIONS.";
+                        MensajeError.error_Encontrado = true;
+                        MostrarError(MensajeError.mensaje_Error);
                     }
                 }
-                if (bandera_Inicio == false)
+                else if (MensajeError.error_Encontrado == false)
                 {
-                    bandera_Inicio = true;
+                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE{DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {no_columnaError}: NO VENIA LA PALABRA ACTIONS O ESCRITA INCORRECTAMENTE.";
+                    MensajeError.error_Encontrado = true;
+                    MostrarError(MensajeError.mensaje_Error);
+                }
+
+                //ESTO ES PARA LOS ERRORES
+                if (i < gramatica.Count)
+                {
+                    while (i < gramatica.Count && MensajeError.error_Encontrado == false)
+                    {
+                        no_columnaError = 0;
+                        var filtro = gramatica[i].ToCharArray();
+                        if (char.IsNumber(filtro[filtro.Length - 1]))
+                        {
+                            CompararArbol(arbol_Error, gramatica[i], ref no_columnaError, Form1.st_ERROR, i);
+                            i++;
+                        }
+                        else
+                        {
+                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
+                            MensajeError.error_Encontrado = true;
+                            MostrarError(MensajeError.mensaje_Error);
+                        }
+                    }
                 }
             }
+            if (MensajeError.error_Encontrado == false && i== gramatica.Count)
+            {
+                ArchivoCorrecto();
+            }
         }
-        public static bool Analizador_Reservada(char[] reservada, char[] linea, ref int contador)
+        public static bool Analizador_Reservada(char[] reservada, char[] linea, int contador, ref int no_columnaError, int linea_Error)
         {
             if (contador < reservada.Length)
             {
-                //no_columnaError++;
-                if (linea[contador] == reservada[contador])
+                no_columnaError++;
+                if (contador < linea.Length)
                 {
-                    contador++;
-                    return Analizador_Reservada(reservada, linea, ref contador);
+                    if (linea[contador] == reservada[contador])
+                    {
+                        return Analizador_Reservada(reservada, linea, contador + 1, ref no_columnaError, linea_Error);
+                    }
                 }
             }
             if (contador == reservada.Length)
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            MensajeError.mensaje_Error = $"ERROR EN LA LINEA {linea_Error}, APROXIMADAMENTE COLUMNA {no_columnaError}: NO VENIA {reservada[contador]}.";
+            return false;
         }
-        public static bool VerificadorSETS(ref int cont_SETS, List<string> archivo, int posicionActual, ref int no_columnaError) 
+
+        static bool bandera_IzquierdaOR = false;
+        static bool bandera_DerechaOR = false;
+        public static void CompararArbol(Nodo arbol, string linea, ref int columna, List<char> st, int linea_Error)
         {
-            while (archivo[posicionActual].Contains("TOKENS") != true)
+            //VERIFICAR CASOS OR, MAS GRANDE Y POR GRANDE
+            //INORDEN
+            if (arbol != null && MensajeError.error_Encontrado == false)
             {
-                var linea_TMP = archivo[posicionActual].ToCharArray();
-                var verificador_Estructura = true; //variable que vea que tenga: LETRA = TERMINALES
-                var contador_Letras = 0;
-                var contador_CharSETS = 0;
-                var igual_Encontrado = false;
-                var flag_segundoPunto = false;
-                var flag_Cierra = false;
-                for (int i = 0; i < linea_TMP.Length; i++)
+                //----------------------------------------INICIO DE RECORRIDO
+                CompararArbol(arbol.hijo_izquierdo, linea, ref columna, st, linea_Error);
+
+                //----------------------------------------ANALISIS DEL NODO------------------------------------
+
+                //CASO OR 1--> QUE EL LADO IZQUIERDO ERA EL BUENO
+                if (arbol.id == '|' && NodoRecorrido(arbol.hijo_izquierdo) == true)
                 {
-                    if (char.IsLetter(linea_TMP[i]) && igual_Encontrado == false)
+                    arbol.recorrido = true;
+                    bandera_IzquierdaOR = true;
+                }
+                //CASO OR 2--> QUE EL LADO DERECHO ERA EL BUENO
+                else if (arbol.id == '|' && bandera_DerechaOR == true)
+                {
+                    bandera_DerechaOR = false;
+                }
+                //CASO OR 3--> NINGUNO VENIA BUENO
+                else if (arbol.id == '|' && NodoRecorrido(arbol.hijo_izquierdo) == false && NodoRecorrido(arbol.hijo_derecho) == false)
+                {
+                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA IDENTIFICADOR.";
+                    MensajeError.error_Encontrado = true;
+                    MostrarError(MensajeError.mensaje_Error);
+                }
+                if (MensajeError.error_Encontrado == false && bandera_IzquierdaOR == false && bandera_DerechaOR == false && columna < linea.Length)
+                {
+                    if (st.Contains(arbol.id) && EsHoja(arbol) != false)//SIMBOLO TERMINAL Y HOJA--> LOS QUE HAY QUE ANALIZAR
                     {
-                        contador_Letras++;
-                    }
-                    switch (linea_TMP[i])
-                    {
-                        case '.':
-                            if (i == 0 || i == linea_TMP.Length - 1)// verifico: No sea el primero o el ultimo
-                            {  
-                                verificador_Estructura = false;
-                            }
-                            if (i + 1 < linea_TMP.Length)
+                        if (arbol.padre.id == '*')
+                        {
+                            if (arbol.id == 'Z')
                             {
-                                if (linea_TMP[i + 1] != '.' && flag_segundoPunto == false)//verifico primer punto y segundo punto
+                                while (linea[columna] == 9 || linea[columna] == 32)
                                 {
-                                    verificador_Estructura = false;
-                                }
-                                if (linea_TMP[i + 1] == '.' && flag_segundoPunto == false)//Si hay concatenado mas de 2 puntos
-                                {
-                                    flag_segundoPunto = true;
+                                    columna++;
+                                    if (columna == linea.Length)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
-                            break;
-                        case '=':
-                            if (i == 0 || i == linea_TMP.Length - 1 || contador_Letras == 0 || igual_Encontrado == true)// verifico que no sea el primero o el ultimo (si es asi, falta el ID o la definicion)
+                            else
                             {
-                                verificador_Estructura = false;
-                            }
-                            igual_Encontrado = true;
-                            break;
-                        case '\'':
-                            if (i == 0 || i == linea_TMP.Length) //si es el primero o el ultimo
-                            {
-                                verificador_Estructura = false;
-                            }
-                            if (i + 2 < linea_TMP.Length)
-                            {
-                                if (char.IsLetterOrDigit(linea_TMP[i + 1]) == false || linea_TMP[i + 2] != '\'')
+                                while (linea[columna] == arbol.id)//AVANZAR EN LOS ESPACIOS
                                 {
-                                    verificador_Estructura = false;
+                                    columna++;
+                                    if (columna == linea.Length)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
-                            break;
-                        case '+':
-                            if (i == 0 || i == linea_TMP.Length) // si es el primero o el ultimo
+                        }
+                        else if (arbol.padre.id == '+')
+                        {
+                            //BUSCAR EL SIMBOLO TERMINAL (ARBOL.ID) EN LA LISTA
+                            var verificador = columna;
+                            switch (arbol.id)
                             {
-                                verificador_Estructura = false;
-                                break;
+                                case 'L':
+                                    if (bandera_IzquierdaOR == false)
+                                    {
+                                        while (char.IsLetter(linea[columna]))
+                                        {
+                                           columna++;
+                                           if (columna == linea.Length)
+                                           {
+                                             break;
+                                           }
+                                        }
+                                        
+                                        if (columna - verificador == 0)
+                                        {
+                                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA IDENTIFICADOR.";
+                                            MensajeError.error_Encontrado = true;
+                                            MostrarError(MensajeError.mensaje_Error);
+                                        }
+                                    }
+                                    break;
+                                case 'N':
+                                    verificador = columna;
+                                    while (char.IsNumber(linea[columna]))
+                                    {
+                                        columna++;
+                                        if (columna == linea.Length)
+                                        {
+                                            break;
+                                        }
+                                        //IF BANDERA_ERROR == TRUE ---> DEVOLVER ERROR
+                                    }
+                                    if (columna - verificador == 0)
+                                    {
+                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA NUMERO.";
+                                        MensajeError.error_Encontrado = true;
+                                        MostrarError(MensajeError.mensaje_Error);
+                                    }
+                                    break;
+                                case ' ':
+                                    while (linea[columna] == ' ')
+                                    {
+                                        columna++;
+                                        if (columna == linea.Length)
+                                        {
+                                            break;
+                                        }
+                                    }
+                                    if (columna - verificador == 0)
+                                    {
+                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA ESPACIOS.";
+                                        MensajeError.error_Encontrado = true;
+                                        MostrarError(MensajeError.mensaje_Error);
+                                    }
+                                    break;
+                                case 'S':
+                                    while (linea[columna] >= 32 && linea[columna] < 255)
+                                    {
+                                        columna++;
+                                        if (columna == linea.Length)
+                                        {
+                                            break;
+                                        }
+                                    }
+                                    //if (linea.Contains('(') && !linea.Contains(')'))
+                                    //{
+                                    //    MensajeError.mensaje_Error = $"ERROR EN LA LINEA {linea}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA UN {arbol.id}";
+                                    //    MensajeError.error_Encontrado = true;
+                                    //    MostrarError(MensajeError.mensaje_Error);
+                                    //}
+                                    if (columna - verificador == 0 && bandera_IzquierdaOR == false && bandera_DerechaOR == false)
+                                    {
+                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA UN NINGUN TERMINAL O SIMBOLO.";
+                                        MensajeError.error_Encontrado = true;
+                                        MostrarError(MensajeError.mensaje_Error);
+                                    }
+                                    break;
                             }
-                            if (i-1 > 0 && i+1 < linea_TMP.Length)// si no tiene comillas a la izquierda o derecha
+                            //YA TENIENDO EL SIMBOLO TERMINAL--> HAGO UN WHILE(!)
+                        }
+                        else if (arbol.padre.id == '.')
+                        {
+                            var verificador = columna;
+                            var contador_Simbolos = 0;
+                            switch (arbol.id)
                             {
-                                if (linea_TMP[i-1] != '\'' && linea_TMP[i+1] != '\'')
+                                case 'S':
+                                    if(linea[columna] >= 32 && linea[columna] < 255)
+                                    //if ((char.IsSymbol(linea[columna]) || char.IsLetterOrDigit(linea[columna])) && linea[columna + 1] != 'H')
+                                    {
+                                        columna++;
+                                        contador_Simbolos++;
+                                    }
+                                    break;
+                            }
+                            if (columna - verificador == 0)
+                            {
+                                //SE HACE POR SI NO AVANZO--> NO ERA S O C
+                                // PARA CARACTERES COMO: =, ', C, H, R, (, ), ., +, E, R, O, T, K, N, +
+                                if (linea[columna] == arbol.id)
                                 {
-                                    verificador_Estructura = false;
+                                    columna++;
                                 }
-                            }
-                            if (i - 5 > 0)//para que venga el mas, debe de estar concatenado antes por ..
-                            {
-                                if (linea_TMP[i - 5] != '.' && linea_TMP[i - 4] != '.')
+                                
+                                //PARA CUANDO EL IZQUIERDO ESTE MALO--> LEVANTAR BANDERA DERECHA
+                                else if (linea[columna] != arbol.id && VerificarPadre(arbol, '|') == true) //&& arbol.padre.hijo_izquierdo.recorrido == false)
                                 {
-                                    verificador_Estructura = false;
-                                }
-                            }
-                            break;
-                        case '(':
-                            if (i == 0 || i == linea_TMP.Length || igual_Encontrado == false || i-3 <=0)//que no sea el primero o el ultimo
-                            {
-                                verificador_Estructura = false;
-                                break;
-                            }
-                            if (linea_TMP[i-3] != 'C' && linea_TMP[i - 2] != 'H' && linea_TMP[i - 3] != 'R')
-                            {
-                                verificador_Estructura = false;
-                                break;
-                            }
-                            var x = i+1;
-                            while (flag_Cierra == false || x < linea_TMP.Length)
-                            {
-                                if (char.IsDigit(linea_TMP[x]) != true || linea_TMP[i+1] == ')')//que no sea digito o que no tenga nada adentro
-                                {
-                                    verificador_Estructura = false;
+                                    bandera_DerechaOR = true;
                                 }
                                 else
                                 {
-                                    contador_CharSETS++;
+                                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE{DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA UN {arbol.id}";
+                                    MensajeError.error_Encontrado = true;
+                                    MostrarError(MensajeError.mensaje_Error);
                                 }
-                                if (linea_TMP[x]== ')' && contador_CharSETS>0)
-                                {
-                                    flag_Cierra = true;
-                                }
-                                x++;
                             }
-                            if (flag_Cierra == false)
+                        }
+                        else if (arbol.padre.id == '|')
+                        {
+                            if (linea[columna] == arbol.id)
                             {
-                                verificador_Estructura = false;
+                                columna++;
                             }
-                            break;
+                        }
                     }
-                    no_columnaError++;
-                    cont_SETS++;
+                    //CASO +GRANDE OR *GRANDE
+                    if ((arbol.id == '*' || arbol.id == '+') && arbol.padre.padre == null && columna < linea.Length)
+                    {
+                        DesactivarRecorrido(arbol);
+                        CompararArbol(arbol, linea, ref columna, st, linea_Error);
+                    }
+                    arbol.recorrido = true;
                 }
-                igual_Encontrado = false;
-                posicionActual++;
-                //caso de que no tenga error el set
-                if (verificador_Estructura != true)
+                //---------------------------------FIN DEL ANALISIS----------------------------
+                CompararArbol(arbol.hijo_derecho, linea, ref columna, st, linea_Error);////FIN DE RECORRIDO
+                //PARA BAJAR LAS BANDERAS
+                if (arbol.id == '|' && (NodoRecorrido(arbol.hijo_izquierdo) == true || NodoRecorrido(arbol.hijo_derecho) == true))
                 {
-                    return false;
+                    bandera_DerechaOR = false;
+                    bandera_IzquierdaOR = false;
+                    
                 }
             }
-            return true;
+        }
+        public static bool EsHoja(Nodo nodo) //SI SE UTILIZA
+        {
+            if (nodo.hijo_derecho == null && nodo.hijo_izquierdo == null)
+            {
+                return true;
+            }
+            return false;
         }
 
-        public static void MostrarError(int no_Linea, int no_columnaError) //CASO NO SE CUMPLIO LA GRAMATICA
+        static bool bandera_PADRE = false;
+        public static bool VerificarPadre(Nodo nodo, char buscado) //SI SE UTILIZA
         {
-            MessageBox.Show("ERROR EN EL ARCHIVO CARGADO, en la linea " + no_Linea + ", columna " + no_columnaError);//AGREGAR no_Columna
+            while (nodo.padre != null)
+            {
+                if (nodo.padre.id == buscado)
+                {
+                    bandera_PADRE = true;
+                }
+                return VerificarPadre(nodo.padre, buscado);
+            }
+            return bandera_PADRE;
+        }
+
+        public static bool NodoRecorrido(Nodo nodo) //SI SE UTILIZA 
+        {
+            if (nodo.recorrido == true)
+            {
+                return true;
+            }
+            return false;
+        }
+        
+        //EN EL CASO DE QUE SE TENGA QUE REPETIR UNA GRAN EXPRESION DEBIDO A QUE SU PAPA ERA +|*
+        public static void DesactivarRecorrido(Nodo nodo) 
+        {
+            if (nodo!= null)
+            {
+                DesactivarRecorrido(nodo.hijo_izquierdo);
+                nodo.recorrido = false;
+                DesactivarRecorrido(nodo.hijo_derecho);
+            }
+        }
+
+        public static int DevolverLineaError(string linea) 
+        {
+            var contador = 1;
+            foreach (var item in ListaOriginal)
+            {
+                if (linea == item)
+                {
+                    return contador;
+                    break;
+                }
+                contador++;
+            }
+            return contador;
+        }
+        
+        //POSIBLES RESULTADOS
+        public static void ArchivoCorrecto()
+        {
+            MessageBox.Show("ARCHIVO DE PRUEBA SIN NINGUN ERROR");
+        }
+        public static void MostrarError(string mensaje) //CASO NO SE CUMPLIO LA GRAMATICA
+        {
+            MessageBox.Show(mensaje);
+            //Application.Restart();
         }
     }
 }
