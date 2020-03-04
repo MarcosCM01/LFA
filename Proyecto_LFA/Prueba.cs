@@ -98,16 +98,16 @@ namespace Proyecto_LFA
                     while (gramatica[i].Contains("TOKENS") == false && MensajeError.error_Encontrado == false )//gramatica[i] == LINEA DEL ARCHIVO
                     {
                         var prueba = gramatica[i].Contains("TOKENS");
-                        no_columnaError = 0;
                         var filtro = gramatica[i].ToCharArray();
                         if (filtro[filtro.Length - 1] == '\'' || filtro[filtro.Length - 1] == ')' || filtro[filtro.Length - 1] == ' ')
                         {
+                            no_columnaError = 0;
                             CompararArbol(arbol_Sets, gramatica[i], ref no_columnaError, Form1.st_SETS, i);
                             i++;
                         }
                         else
                         {
-                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])+1}: DEFINICION INCOMPLETA O NO TERMINO CORRECTAMENTE LA ORACION";
+                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, COLUMNA {no_columnaError+1}: DEFINICION INCOMPLETA O NO TERMINO CORRECTAMENTE LA ORACION";
                             MensajeError.error_Encontrado = true;
                             MostrarError(MensajeError.mensaje_Error);
                         }
@@ -135,18 +135,32 @@ namespace Proyecto_LFA
                     }
                     else
                     {
-                        no_columnaError = 0;
                         var filtro = gramatica[i].ToCharArray();
-                        if (filtro[filtro.Length - 1] == '\'' || filtro[filtro.Length - 1] == '}' || filtro[filtro.Length - 1] == ' ' || filtro[filtro.Length - 1] == '*')
+                        var cerrar = false;
+                        if (gramatica[i].Contains('(') && gramatica[i].Contains(')')== false)
                         {
+                            cerrar = true;
+                        }
+                        if (filtro[filtro.Length - 1] == '\'' || filtro[filtro.Length - 1] == '}' || filtro[filtro.Length - 1] == ' ' || filtro[filtro.Length - 1] == '*' && cerrar == false)
+                        {
+                            no_columnaError = 0;
                             CompararArbol(arbol_Tokens, gramatica[i], ref no_columnaError, Form1.st_TOKENS, i);
                             i++;
                         }
                         else
                         {
-                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE EN LA COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
-                            MensajeError.error_Encontrado = true;
-                            MostrarError(MensajeError.mensaje_Error);
+                            if (gramatica[i].Contains('(') && !gramatica[i].Contains(')'))
+                            {
+                                MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}: NO CERRO EL PARENTESIS EN EL TOKEN";
+                                MensajeError.error_Encontrado = true;
+                                MostrarError(MensajeError.mensaje_Error);
+                            }
+                            else
+                            {
+                                MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE EN LA COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
+                                MensajeError.error_Encontrado = true;
+                                MostrarError(MensajeError.mensaje_Error);
+                            }
                         }
                         //if (filtro.Contains('(') && !filtro.Contains(')'))
                         //{
@@ -185,14 +199,14 @@ namespace Proyecto_LFA
                                 }
                                 else
                                 {
-                                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
+                                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
                                     MensajeError.error_Encontrado = true;
                                     MostrarError(MensajeError.mensaje_Error);
                                 }
                             }
                             if (i - contador_Actions == 0 || i == gramatica.Count && MensajeError.error_Encontrado == false)
                             {
-                                MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, COLUMNA {1}: NO VENIA LA LLAVE FINAL";
+                                MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, COLUMNA {1}: NO VENIA LA LLAVE FINAL";
                                 MensajeError.error_Encontrado = true;
                                 MostrarError(MensajeError.mensaje_Error);
                             }
@@ -203,21 +217,21 @@ namespace Proyecto_LFA
                         }
                         else if (MensajeError.error_Encontrado == false)
                         {
-                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {1}: NO VENIA LA LLAVE INICIAL";
+                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {1}: NO VENIA LA LLAVE INICIAL";
                             MensajeError.error_Encontrado = true;
                             MostrarError(MensajeError.mensaje_Error);
                         }
                     }
                     else if (MensajeError.error_Encontrado == false)
                     {
-                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {no_columnaError}: NO VENIA LA PALABRA RESERVADAS ACOMPAÑANDO A ACTIONS.";
+                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {no_columnaError}: NO VENIA LA PALABRA RESERVADAS ACOMPAÑANDO A ACTIONS.";
                         MensajeError.error_Encontrado = true;
                         MostrarError(MensajeError.mensaje_Error);
                     }
                 }
                 else if (MensajeError.error_Encontrado == false)
                 {
-                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE{DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {no_columnaError}: NO VENIA LA PALABRA ACTIONS O ESCRITA INCORRECTAMENTE.";
+                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {no_columnaError}: NO VENIA LA PALABRA ACTIONS O ESCRITA INCORRECTAMENTE.";
                     MensajeError.error_Encontrado = true;
                     MostrarError(MensajeError.mensaje_Error);
                 }
@@ -227,16 +241,16 @@ namespace Proyecto_LFA
                 {
                     while (i < gramatica.Count && MensajeError.error_Encontrado == false)
                     {
-                        no_columnaError = 0;
                         var filtro = gramatica[i].ToCharArray();
                         if (char.IsNumber(filtro[filtro.Length - 1]))
                         {
+                            no_columnaError = 0;
                             CompararArbol(arbol_Error, gramatica[i], ref no_columnaError, Form1.st_ERROR, i);
                             i++;
                         }
                         else
                         {
-                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
+                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
                             MensajeError.error_Encontrado = true;
                             MostrarError(MensajeError.mensaje_Error);
                         }
@@ -296,7 +310,7 @@ namespace Proyecto_LFA
                 //CASO OR 3--> NINGUNO VENIA BUENO
                 else if (arbol.id == '|' && NodoRecorrido(arbol.hijo_izquierdo) == false && NodoRecorrido(arbol.hijo_derecho) == false)
                 {
-                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA IDENTIFICADOR.";
+                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA IDENTIFICADOR.";
                     MensajeError.error_Encontrado = true;
                     MostrarError(MensajeError.mensaje_Error);
                 }
@@ -349,7 +363,7 @@ namespace Proyecto_LFA
                                         
                                         if (columna - verificador == 0)
                                         {
-                                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA IDENTIFICADOR.";
+                                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA IDENTIFICADOR.";
                                             MensajeError.error_Encontrado = true;
                                             MostrarError(MensajeError.mensaje_Error);
                                         }
@@ -368,7 +382,7 @@ namespace Proyecto_LFA
                                     }
                                     if (columna - verificador == 0)
                                     {
-                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA NUMERO.";
+                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA NUMERO.";
                                         MensajeError.error_Encontrado = true;
                                         MostrarError(MensajeError.mensaje_Error);
                                     }
@@ -384,18 +398,34 @@ namespace Proyecto_LFA
                                     }
                                     if (columna - verificador == 0)
                                     {
-                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA ESPACIOS.";
+                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA ESPACIOS.";
                                         MensajeError.error_Encontrado = true;
                                         MostrarError(MensajeError.mensaje_Error);
                                     }
                                     break;
                                 case 'S':
+                                    var parentesis_A = false;
+                                    var parentesis_C = false;
                                     while (linea[columna] >= 32 && linea[columna] < 255)
                                     {
                                         columna++;
+                                        //if (columna == linea.Length && (parentesis_A == true && parentesis_C == false))
+                                        //{
+                                        //    MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: DEFINICION INCOMPLETA.";
+                                        //    MensajeError.error_Encontrado = true;
+                                        //    MostrarError(MensajeError.mensaje_Error);
+                                        //}
                                         if (columna == linea.Length)
                                         {
                                             break;
+                                        }
+                                        if (linea[columna]== '(')
+                                        {
+                                            parentesis_A = true;
+                                        }
+                                        if (linea[columna] == ')')
+                                        {
+                                            parentesis_A = true;
                                         }
                                     }
                                     //if (linea.Contains('(') && !linea.Contains(')'))
