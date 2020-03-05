@@ -35,7 +35,7 @@ namespace Proyecto_LFA
         //"( *.L+. *.=. *.(('.S.')|(C.H.R.\\(.N+.\\))).(((\\..\\.)|\\+).(('.S.')|(C.H.R.\\(.N+.\\))))*)"
         //"( *.T.O.K.E.N. *.N+. *.=. *.((('.S.')|S+). *)+)"
         public static string expresionR_SETS = "( *.L+. *.=. *.(('.S.')|(C.H.R.\\(.N+.\\))).(((\\..\\.)|\\+).(('.S.')|(C.H.R.\\(.N+.\\))). *)*)";
-        public static string expresionR_TOKENS = "( *.T.O.K.E.N.Z*.N+.Z*.=.Z*.((('.S.')|S+). *)+)";
+        public static string expresionR_TOKENS = "( *.T.O.K.E.N.Z*.N+.Z*.=.Z*.((('.S.')|L+). *)+)";
         public static string expresionR_ACTIONS = "( *.N+. *.=. *.'.L+.')";
         public static string expresionR_ERROR = "( *.E.R.R.O.R. *.=. *.N+)";
         //LISTAS PARA ALMACENAR LOS SIMBOLOS TERMINALES Y OPERADORES

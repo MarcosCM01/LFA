@@ -40,6 +40,15 @@ namespace Proyecto_LFA
             }
             return false;
         }
+        public static bool SoloTabs(string linea)
+        {
+            var decide = false;
+            if (decide = linea.All(x => x == '\t') == true)
+            {
+                return true;
+            }
+            return false;
+        }
         public static void LeerArchivo(string rutaFile, Nodo arbol_Sets, Nodo arbol_Tokens, Nodo arbol_Actions, Nodo arbol_Error)
         {
             //variables auxiliares
@@ -54,7 +63,7 @@ namespace Proyecto_LFA
                     ListaOriginal.Add(line);
                     if (string.IsNullOrEmpty(line) == false) 
                     {
-                        if (SoloEspacios(line) == false)
+                        if (SoloEspacios(line) == false && SoloTabs(line)==false)
                         {
                             gramatica.Add(line.Trim('\t'));
                         }
@@ -162,12 +171,6 @@ namespace Proyecto_LFA
                                 MostrarError(MensajeError.mensaje_Error);
                             }
                         }
-                        //if (filtro.Contains('(') && !filtro.Contains(')'))
-                        //{
-                        //    MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE EN LA COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
-                        //    MensajeError.error_Encontrado = true;
-                        //    MostrarError(MensajeError.mensaje_Error);
-                        //}
                     }
                 }
                 if (i - inicio_Gramatica == 0 && MensajeError.error_Encontrado == false)//ERROR. NO VINO NINGUN TOKEN
@@ -184,15 +187,16 @@ namespace Proyecto_LFA
                     if (Analizador_Reservada(reservada_RESERVADAS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true && MensajeError.error_Encontrado == false)
                     {
                         i++;
+                        //{
                         if (gramatica[i] == "{")
                         {
                             i++;
                             var contador_Actions = i;
-                            while ((gramatica[i].Contains("}") == false && i < gramatica.Count) && MensajeError.error_Encontrado == false)
+                            while (gramatica[i].Contains("}") == false && i < gramatica.Count && MensajeError.error_Encontrado == false)
                             {
                                 no_columnaError = 0;
                                 var filtro = gramatica[i].ToCharArray();
-                                if (filtro[filtro.Length - 1] == '\'' )
+                                if (filtro[filtro.Length - 1] == '\'')
                                 {
                                     CompararArbol(arbol_Actions, gramatica[i], ref no_columnaError, Form1.st_ACTIONS, i);
                                     i++;
@@ -210,32 +214,88 @@ namespace Proyecto_LFA
                                 MensajeError.error_Encontrado = true;
                                 MostrarError(MensajeError.mensaje_Error);
                             }
-                        }
-                        if (gramatica[i] == "}")
-                        {
-                            i++;
-                        }
-                        else if (MensajeError.error_Encontrado == false)
-                        {
-                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {1}: NO VENIA LA LLAVE INICIAL";
-                            MensajeError.error_Encontrado = true;
-                            MostrarError(MensajeError.mensaje_Error);
+                            if (gramatica[i] == "}" && i < gramatica.Count)
+                            {
+                                i++;
+                            }
+                            else
+                            {
+                                MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {1}: NO VENIA LA LLAVE FINAL DE LA FUNCION";
+                                MensajeError.error_Encontrado = true;
+                                MostrarError(MensajeError.mensaje_Error);
+                            }
                         }
                     }
-                    else if (MensajeError.error_Encontrado == false)
+                    else
                     {
                         MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {no_columnaError}: NO VENIA LA PALABRA RESERVADAS ACOMPAÑANDO A ACTIONS.";
                         MensajeError.error_Encontrado = true;
                         MostrarError(MensajeError.mensaje_Error);
                     }
                 }
-                else if (MensajeError.error_Encontrado == false)
+                else
                 {
                     MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {no_columnaError}: NO VENIA LA PALABRA ACTIONS O ESCRITA INCORRECTAMENTE.";
                     MensajeError.error_Encontrado = true;
                     MostrarError(MensajeError.mensaje_Error);
                 }
-
+                //PARA MAS FUNCIONES
+                while (gramatica[i].Contains("ERROR") == false && i < gramatica.Count && MensajeError.error_Encontrado == false)
+                {
+                    if (gramatica[i].Contains('(') && gramatica[i].Contains(')'))
+                    {
+                        i++;
+                        if (gramatica[i] == "{")
+                        {
+                            i++;
+                            var contador_Actions = i;
+                            while (gramatica[i].Contains("}") == false && i < gramatica.Count && MensajeError.error_Encontrado == false)
+                            {
+                                no_columnaError = 0;
+                                var filtro = gramatica[i].ToCharArray();
+                                if (filtro[filtro.Length - 1] == '\'')
+                                {
+                                    CompararArbol(arbol_Actions, gramatica[i], ref no_columnaError, Form1.st_ACTIONS, i);
+                                    i++;
+                                }
+                                else
+                                {
+                                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
+                                    MensajeError.error_Encontrado = true;
+                                    MostrarError(MensajeError.mensaje_Error);
+                                }
+                            }
+                            if (i - contador_Actions == 0 || i == gramatica.Count && MensajeError.error_Encontrado == false)
+                            {
+                                MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, COLUMNA {1}: NO VENIA LA LLAVE FINAL";
+                                MensajeError.error_Encontrado = true;
+                                MostrarError(MensajeError.mensaje_Error);
+                            }
+                            if (gramatica[i] == "}" && i < gramatica.Count)
+                            {
+                                i++;
+                            }
+                            else
+                            {
+                                MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {1}: NO VENIA LA LLAVE FINAL DE LA FUNCION";
+                                MensajeError.error_Encontrado = true;
+                                MostrarError(MensajeError.mensaje_Error);
+                            }
+                        }
+                        else
+                        {
+                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {1}: NO VENIA LA LLAVE INICIAL DE LA FUNCION";
+                            MensajeError.error_Encontrado = true;
+                            MostrarError(MensajeError.mensaje_Error);
+                        }
+                    }
+                    else
+                    {
+                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, COLUMNA {gramatica[i].Length}: DEFINICION INCOMPLETA DE UNA FUNCION";
+                        MensajeError.error_Encontrado = true;
+                        MostrarError(MensajeError.mensaje_Error);
+                    }
+                }
                 //ESTO ES PARA LOS ERRORES
                 if (i < gramatica.Count)
                 {
@@ -250,7 +310,7 @@ namespace Proyecto_LFA
                         }
                         else
                         {
-                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {filtro.Length - 1}: DEFINICION INCOMPLETA";
+                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, APROXIMADAMENTE COLUMNA {filtro.Length - 1}: PARA LOS ERRORES, SOLO DEBEN DE VENIR NUMEROS";
                             MensajeError.error_Encontrado = true;
                             MostrarError(MensajeError.mensaje_Error);
                         }
@@ -285,6 +345,7 @@ namespace Proyecto_LFA
 
         static bool bandera_IzquierdaOR = false;
         static bool bandera_DerechaOR = false;
+        static List<string> ids = new List<string>();
         public static void CompararArbol(Nodo arbol, string linea, ref int columna, List<char> st, int linea_Error)
         {
             //VERIFICAR CASOS OR, MAS GRANDE Y POR GRANDE
@@ -352,18 +413,71 @@ namespace Proyecto_LFA
                                 case 'L':
                                     if (bandera_IzquierdaOR == false)
                                     {
-                                        while (char.IsLetter(linea[columna]))
+                                        while ((char.IsUpper(linea[columna]) || linea[columna] == '*' || linea[columna] == '|' || linea[columna] == '(' || linea[columna] == '{' || linea[columna] == ')' || linea[columna] == '}') && MensajeError.error_Encontrado == false)
                                         {
-                                           columna++;
+                                            switch (linea[columna])
+                                            {
+                                                case '*':
+                                                    var item = string.Empty;
+                                                    for (int i = verificador; i < columna; i++)
+                                                    {
+                                                        item += linea[verificador];
+                                                    }
+                                                    ids.Add(item);
+                                                    break;
+                                                case '|':
+                                                    if (columna < linea.Length)
+                                                    {
+                                                        var contador_S = 0;
+                                                        var punto = columna;
+                                                        while (punto < linea.Length)
+                                                        {
+                                                            if (char.IsUpper(linea[punto]))
+                                                            {
+                                                                contador_S++;
+                                                            }
+                                                            punto++;
+                                                        }
+                                                        if (contador_S == 0)
+                                                        {
+                                                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA NADA DESPUES DEL |.";
+                                                            MensajeError.error_Encontrado = true;
+                                                            MostrarError(MensajeError.mensaje_Error);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA NADA DESPUES DEL |.";
+                                                        MensajeError.error_Encontrado = true;
+                                                        MostrarError(MensajeError.mensaje_Error);
+                                                    }
+                                                    break;
+                                                case '(':
+                                                    if (linea.Contains(')') == false)
+                                                    {
+                                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: LA EXPRESION NO CERRO PARENTESIS.";
+                                                        MensajeError.error_Encontrado = true;
+                                                        MostrarError(MensajeError.mensaje_Error);
+                                                    }
+                                                    break;
+                                                case '{':
+                                                    if (linea.Contains('}') == false)
+                                                    {
+                                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: LA EXPRESION NO CERRO LLAVES.";
+                                                        MensajeError.error_Encontrado = true;
+                                                        MostrarError(MensajeError.mensaje_Error);
+                                                    }
+                                                    break;
+                                            }
+                                            columna++;
                                            if (columna == linea.Length)
                                            {
                                              break;
                                            }
                                         }
-                                        
                                         if (columna - verificador == 0)
                                         {
-                                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA IDENTIFICADOR.";
+                                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna+1}: NO VENIA IDENTIFICADOR.";
                                             MensajeError.error_Encontrado = true;
                                             MostrarError(MensajeError.mensaje_Error);
                                         }
@@ -382,7 +496,7 @@ namespace Proyecto_LFA
                                     }
                                     if (columna - verificador == 0)
                                     {
-                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA NUMERO.";
+                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna+1}: NO VENIA NUMERO.";
                                         MensajeError.error_Encontrado = true;
                                         MostrarError(MensajeError.mensaje_Error);
                                     }
@@ -406,15 +520,15 @@ namespace Proyecto_LFA
                                 case 'S':
                                     var parentesis_A = false;
                                     var parentesis_C = false;
-                                    while (linea[columna] >= 32 && linea[columna] < 255)
+                                    while (linea[columna] >= 32 && linea[columna] < 255 && MensajeError.error_Encontrado == false)
                                     {
+                                        if (char.IsLetter(linea[columna]) == true && char.IsUpper(linea[columna]) == false)
+                                        {
+                                            MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: VINO MINUSCULAS.";
+                                            MensajeError.error_Encontrado = true;
+                                            MostrarError(MensajeError.mensaje_Error);
+                                        }
                                         columna++;
-                                        //if (columna == linea.Length && (parentesis_A == true && parentesis_C == false))
-                                        //{
-                                        //    MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: DEFINICION INCOMPLETA.";
-                                        //    MensajeError.error_Encontrado = true;
-                                        //    MostrarError(MensajeError.mensaje_Error);
-                                        //}
                                         if (columna == linea.Length)
                                         {
                                             break;
@@ -428,15 +542,9 @@ namespace Proyecto_LFA
                                             parentesis_A = true;
                                         }
                                     }
-                                    //if (linea.Contains('(') && !linea.Contains(')'))
-                                    //{
-                                    //    MensajeError.mensaje_Error = $"ERROR EN LA LINEA {linea}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA UN {arbol.id}";
-                                    //    MensajeError.error_Encontrado = true;
-                                    //    MostrarError(MensajeError.mensaje_Error);
-                                    //}
                                     if (columna - verificador == 0 && bandera_IzquierdaOR == false && bandera_DerechaOR == false)
                                     {
-                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna}: NO VENIA UN NINGUN TERMINAL O SIMBOLO.";
+                                        MensajeError.mensaje_Error = $"ERROR EN LA LINEA APROXIMADAMENTE {DevolverLineaError(linea)}, APROXIMADAMENTE COLUMNA {columna+1}: NO VENIA UN NINGUN TERMINAL O SIMBOLO.";
                                         MensajeError.error_Encontrado = true;
                                         MostrarError(MensajeError.mensaje_Error);
                                     }
@@ -559,7 +667,6 @@ namespace Proyecto_LFA
                 if (linea == item)
                 {
                     return contador;
-                    break;
                 }
                 contador++;
             }
@@ -574,7 +681,6 @@ namespace Proyecto_LFA
         public static void MostrarError(string mensaje) //CASO NO SE CUMPLIO LA GRAMATICA
         {
             MessageBox.Show(mensaje);
-            //Application.Restart();
         }
     }
 }
