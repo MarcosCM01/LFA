@@ -56,9 +56,11 @@
     </Compile>
     <Compile Include="Helpers.cs" />
     <Compile Include="Nodo.cs" />
+    <Compile Include="NodoGenerico.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Prueba.cs" />
+    <Compile Include="SintacticoA.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
