@@ -45,8 +45,7 @@ namespace Proyecto_LFA
         public static List<char> st_ACTIONS = new List<char>();
         public static List<char> st_ERROR = new List<char>();
         public static List<string> st_SINTACTICO = new List<string>();
-
-        public static List<char> st_prueba = new List<char>();
+        //public static Dictionary<int, List<int>> tabla_follow = new Dictionary<int, List<int>>();
 
         private void btnAnalizar_Click(object sender, EventArgs e)
         {
@@ -80,14 +79,19 @@ namespace Proyecto_LFA
 
                     if (MensajeError.error_Encontrado == false)
                     {
-                        //ANALIZADOR SINTACTICO
                         //------------------------------> ANALIZADOR SINTACTICO
                         var error_Sintactico = false;
+                        //1.Tokenizar expresion
                         var expresion_TokensS = SintacticoA.Tokenizar(Prueba.gramatica, inicioTokens, finalTokens, ref error_Sintactico);
                         Expresiones_Regulares.ST_Sintactico(st_SINTACTICO, operadores, expresion_TokensS);
+                        //2. Generar arbol de expresion
                         var arbol_Sintactico = Helpers.GenerarArbol(st_SINTACTICO, operadores, expresion_TokensS);
                         var contador_Hojas = 1;
-                        Helpers.FLN(arbol_Sintactico, ref contador_Hojas);
+                        var tabla_follow = new Dictionary<int, List<int>>();
+                        //3. Enumerar hojas; obtener first, last & nullable
+                        Helpers.FLN(arbol_Sintactico, ref contador_Hojas, ref tabla_follow);
+                        //4. Generar tabla de follows
+                        Helpers.Generar_Follow(arbol_Sintactico, ref tabla_follow);
                     }
 
                 }

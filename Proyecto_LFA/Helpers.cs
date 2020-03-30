@@ -165,15 +165,17 @@ namespace Proyecto_LFA
             return false;
         }
 
-        public static void FLN(Nodo_Generico arbol_Expresion, ref int contador) 
+        public static void FLN(Nodo_Generico arbol_Expresion, ref int contador, ref Dictionary<int, List<int>> follows) 
         {
             if (arbol_Expresion != null)
             {
-                FLN(arbol_Expresion.hijo_izquierdo, ref contador);
-                FLN(arbol_Expresion.hijo_derecho, ref contador);
+                FLN(arbol_Expresion.hijo_izquierdo, ref contador, ref follows);
+                FLN(arbol_Expresion.hijo_derecho, ref contador, ref follows);
                 if (Verificar_esHoja(arbol_Expresion) == true)
                 {
                     arbol_Expresion.numero_hoja = contador;
+                    var list_Aux = new List<int>();
+                    follows.Add(contador, list_Aux);
                     //Genero First, last
                     Obtener_First(arbol_Expresion, true);
                     Obtener_Last(arbol_Expresion, true);
@@ -346,6 +348,58 @@ namespace Proyecto_LFA
                     nodo.nullable = true;
                     break;
             }
+        }
+        public static void Generar_Follow(Nodo_Generico arbol, ref Dictionary<int, List<int>> tabla_follow) 
+        {
+            if (arbol!= null)
+            {
+                Generar_Follow(arbol.hijo_izquierdo, ref tabla_follow);
+                Generar_Follow(arbol.hijo_derecho, ref tabla_follow);
+                if (Verificar_esHoja(arbol) == false)
+                {
+                    switch (arbol.id)
+                    {
+                        case ".":
+                            for (int i = 0; i < arbol.hijo_izquierdo.last.Count; i++)
+                            {
+                                for (int j = 0; j < arbol.hijo_derecho.first.Count; j++)
+                                {
+                                    if (!tabla_follow[arbol.hijo_izquierdo.last[i]].Contains(arbol.hijo_derecho.first[j]))
+                                    {
+                                        tabla_follow[arbol.hijo_izquierdo.last[i]].Add(arbol.hijo_derecho.first[j]);
+                                    }
+                                }
+                            }
+                            break;
+                        case "+":
+                            for (int i = 0; i < arbol.hijo_izquierdo.last.Count; i++)
+                            {
+                                for (int j = 0; j < arbol.hijo_izquierdo.first.Count; j++)
+                                {
+                                    if (!tabla_follow[arbol.hijo_izquierdo.last[i]].Contains(arbol.hijo_izquierdo.first[j]))
+                                    {
+                                        tabla_follow[arbol.hijo_izquierdo.last[i]].Add(arbol.hijo_izquierdo.first[j]);
+                                    }
+                                }
+                            }
+                            break;
+                        case "*":
+                            for (int i = 0; i < arbol.hijo_izquierdo.last.Count; i++)
+                            {
+                                for (int j = 0; j < arbol.hijo_izquierdo.first.Count; j++)
+                                {
+                                    if (!tabla_follow[arbol.hijo_izquierdo.last[i]].Contains(arbol.hijo_izquierdo.first[j]))
+                                    {
+                                        tabla_follow[arbol.hijo_izquierdo.last[i]].Add(arbol.hijo_izquierdo.first[j]);
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+            
+            
         }
     }
 }
