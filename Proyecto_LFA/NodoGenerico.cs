@@ -14,6 +14,10 @@ namespace Proyecto_LFA
         public Nodo_Generico padre { get; set; } //Sirve para el metodo de eliminar
         public bool recorrido { get; set; }
         public string id { get; set; }//Valor del nodo
+        public int numero_hoja { get; set; }//Numero de la hoja
+        public bool nullable { get; set; }//Saber si es nullable
+        public List<int> first { get; set; }
+        public List<int> last { get; set; }
 
         //First, Last, Annulable
 
@@ -23,6 +27,10 @@ namespace Proyecto_LFA
             this.hijo_izquierdo = null;
             this.padre = null;
             this.recorrido = false;
+            this.numero_hoja = 0;
+            this.nullable = false;
+            this.first = new List<int>();
+            this.last = new List<int>();
             id = value;
         }
     }

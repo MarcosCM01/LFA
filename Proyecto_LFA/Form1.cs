@@ -38,7 +38,6 @@ namespace Proyecto_LFA
         public static string expresionR_TOKENS = "( *.T.O.K.E.N.Z*.N+.Z*.=.Z*.((('.S.')|L+). *)+)";
         public static string expresionR_ACTIONS = "( *.N+. *.=. *.'.L+.')";
         public static string expresionR_ERROR = "( *.E.R.R.O.R. *.=. *.N+)";
-        public static string prueba = "((D.D*)|('.CHARSET.')|('.CHARSET.')|(=)|(<.>)|(<)|(>)|(>.=)|(<.=)|(\\+)|(-)|(O.R)|(\\*)|(A.N.D)|(M.O.D)|(D.I.V)|(N.O.T)|(\\(.\\*)|(\\*.\\))|(;)|(\\.)|({)|(})|(\\()|(\\))|([)|(])|(\\..\\.)|(:)|(,)|(:.=)|(L.(L|D)*).#)";
         //LISTAS PARA ALMACENAR LOS SIMBOLOS TERMINALES Y OPERADORES
         public static List<char> operadores = new List<char>();
         public static List<char> st_SETS = new List<char>();
@@ -63,7 +62,6 @@ namespace Proyecto_LFA
                     Expresiones_Regulares.Generar_ST(operadores, st_TOKENS, expresionR_TOKENS);
                     Expresiones_Regulares.Generar_ST(operadores, st_ACTIONS, expresionR_ACTIONS);
                     Expresiones_Regulares.Generar_ST(operadores, st_ERROR, expresionR_ERROR);
-                    Expresiones_Regulares.Generar_ST(operadores, st_prueba, prueba);
 
                     //GENERAR DICCIONARIO SOBRE VALORES DE PRECEDENCIA
                     Arbol_Expresiones.LlenarDiccionarioPrecedencia(operadores);
@@ -73,7 +71,6 @@ namespace Proyecto_LFA
                     var arbol_TOKENS = Arbol_Expresiones.GenerarArbol(st_TOKENS, operadores, expresionR_TOKENS);
                     var arbol_ACTIONS = Arbol_Expresiones.GenerarArbol(st_ACTIONS, operadores, expresionR_ACTIONS);
                     var arbol_ERROR = Arbol_Expresiones.GenerarArbol(st_ERROR, operadores, expresionR_ERROR);
-                    var arbol_prueba = Arbol_Expresiones.GenerarArbol(st_prueba, operadores, prueba);
 
                     var inicioTokens = 0;
                     var finalTokens = 0;
@@ -87,9 +84,10 @@ namespace Proyecto_LFA
                         //------------------------------> ANALIZADOR SINTACTICO
                         var error_Sintactico = false;
                         var expresion_TokensS = SintacticoA.Tokenizar(Prueba.gramatica, inicioTokens, finalTokens, ref error_Sintactico);
-                        var prueba2 = "((D.D*)|('.CHARSET.')|('.CHARSET.')|(=)|(<.>)|(<)|(>)|(>.=)|(<.=)|(\\+)|(-)|(O.R)|(\\*)|(A.N.D)|(M.O.D)|(D.I.V)|(N.O.T)|(\\(.\\*)|(\\*.\\))|(;)|(\\.)|({)|(})|(\\()|(\\))|([)|(])|(\\..\\.)|(:)|(,)|(:.=)|(L.(L|D)*).#)";
                         Expresiones_Regulares.ST_Sintactico(st_SINTACTICO, operadores, expresion_TokensS);
                         var arbol_Sintactico = Helpers.GenerarArbol(st_SINTACTICO, operadores, expresion_TokensS);
+                        var contador_Hojas = 1;
+                        Helpers.FLN(arbol_Sintactico, ref contador_Hojas);
                     }
 
                 }

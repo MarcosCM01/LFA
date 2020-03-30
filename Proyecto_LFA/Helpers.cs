@@ -138,8 +138,6 @@ namespace Proyecto_LFA
                     //ERROR= TOKEN NO ENCONTRADO
                 }
             }
-            //COMPROBAR ARBOL MEDIANTE INORDEN
-            //In_Orden(pila_Arboles.Peek());
             return pila_Arboles.Peek();
         }
 
@@ -166,13 +164,187 @@ namespace Proyecto_LFA
             }
             return false;
         }
-        public static void In_Orden(Nodo hoja)
+
+        public static void FLN(Nodo_Generico arbol_Expresion, ref int contador) 
         {
-            if (hoja != null)
+            if (arbol_Expresion != null)
             {
-                In_Orden(hoja.hijo_izquierdo);
-                Arbol_Final.Add(hoja.id);
-                In_Orden(hoja.hijo_derecho);
+                FLN(arbol_Expresion.hijo_izquierdo, ref contador);
+                FLN(arbol_Expresion.hijo_derecho, ref contador);
+                if (Verificar_esHoja(arbol_Expresion) == true)
+                {
+                    arbol_Expresion.numero_hoja = contador;
+                    //Genero First, last
+                    Obtener_First(arbol_Expresion, true);
+                    Obtener_Last(arbol_Expresion, true);
+                    contador++;
+                }
+                else
+                {
+                    Obtener_First(arbol_Expresion, false);
+                    Obtener_Last(arbol_Expresion, false);
+                    Obtener_Nullable(arbol_Expresion);
+                }
+            }
+        }
+        public static bool Verificar_esHoja(Nodo_Generico nodo) 
+        {
+            if (nodo.hijo_derecho == null && nodo.hijo_izquierdo == null)
+            {
+                return true;
+            }
+            return false;
+        }
+        public static void Obtener_First(Nodo_Generico nodo, bool es_Hoja) 
+        {
+            if (es_Hoja == true)
+            {
+                nodo.first.Add(nodo.numero_hoja);
+            }
+            else
+            {
+                switch (nodo.id)
+                {
+                    case "|"://F= F(IZQ)+F(DER)
+                        for (int i = 0; i < nodo.hijo_izquierdo.first.Count; i++)
+                        {
+                            nodo.first.Add(nodo.hijo_izquierdo.first[i]);
+                        }
+                        for (int i = 0; i < nodo.hijo_derecho.first.Count; i++)
+                        {
+                            nodo.first.Add(nodo.hijo_derecho.first[i]);
+                        }
+                        break;
+                    case ".":// if N(IZQ): F=F(IZQ)+F(DER)-----------------ELSE: F=F(IZQ)
+                        if (nodo.hijo_izquierdo.nullable == true)
+                        {
+                            for (int i = 0; i < nodo.hijo_izquierdo.first.Count; i++)
+                            {
+                                nodo.first.Add(nodo.hijo_izquierdo.first[i]);
+                            }
+                            for (int i = 0; i < nodo.hijo_derecho.first.Count; i++)
+                            {
+                                nodo.first.Add(nodo.hijo_derecho.first[i]);
+                            }
+                        }
+                        else
+                        {
+                            for (int i = 0; i < nodo.hijo_izquierdo.first.Count; i++)
+                            {
+                                nodo.first.Add(nodo.hijo_izquierdo.first[i]);
+                            }
+                        }
+                        break;
+                    case "*"://F=F(IZQ)
+                        for (int i = 0; i < nodo.hijo_izquierdo.first.Count; i++)
+                        {
+                            nodo.first.Add(nodo.hijo_izquierdo.first[i]);
+                        }
+                        break;
+                    case "+"://F=F(IZQ)
+                        for (int i = 0; i < nodo.hijo_izquierdo.first.Count; i++)
+                        {
+                            nodo.first.Add(nodo.hijo_izquierdo.first[i]);
+                        }
+                        break;
+                    case "?"://F=F(IZQ)
+                        for (int i = 0; i < nodo.hijo_izquierdo.first.Count; i++)
+                        {
+                            nodo.first.Add(nodo.hijo_izquierdo.first[i]);
+                        }
+                        break;
+                }
+            }
+        }
+        public static void Obtener_Last(Nodo_Generico nodo, bool es_Hoja)
+        {
+            if (es_Hoja == true)
+            {
+                nodo.last.Add(nodo.numero_hoja);
+            }
+            else
+            {
+                switch (nodo.id)
+                {
+                    case "|"://L= L(IZQ)+L(DER)
+                        for (int i = 0; i < nodo.hijo_izquierdo.last.Count; i++)
+                        {
+                            nodo.last.Add(nodo.hijo_izquierdo.last[i]);
+                        }
+                        for (int i = 0; i < nodo.hijo_derecho.last.Count; i++)
+                        {
+                            nodo.last.Add(nodo.hijo_derecho.last[i]);
+                        }
+                        break;
+                    case ".":// if N(DER): L=L(IZQ)+L(DER)-----------------ELSE: L=L(DER)
+                        if (nodo.hijo_derecho.nullable == true)
+                        {
+                            for (int i = 0; i < nodo.hijo_izquierdo.last.Count; i++)
+                            {
+                                nodo.last.Add(nodo.hijo_izquierdo.last[i]);
+                            }
+                            for (int i = 0; i < nodo.hijo_derecho.last.Count; i++)
+                            {
+                                nodo.last.Add(nodo.hijo_derecho.last[i]);
+                            }
+                        }
+                        else
+                        {
+                            for (int i = 0; i < nodo.hijo_derecho.last.Count; i++)
+                            {
+                                nodo.last.Add(nodo.hijo_derecho.last[i]);
+                            }
+                        }
+                        break;
+                    case "*"://L=L(IZQ)
+                        for (int i = 0; i < nodo.hijo_izquierdo.last.Count; i++)
+                        {
+                            nodo.last.Add(nodo.hijo_izquierdo.last[i]);
+                        }
+                        break;
+                    case "+"://F=F(IZQ)
+                        for (int i = 0; i < nodo.hijo_izquierdo.last.Count; i++)
+                        {
+                            nodo.last.Add(nodo.hijo_izquierdo.last[i]);
+                        }
+                        break;
+                    case "?"://F=F(IZQ)
+                        for (int i = 0; i < nodo.hijo_izquierdo.last.Count; i++)
+                        {
+                            nodo.last.Add(nodo.hijo_izquierdo.last[i]);
+                        }
+                        break;
+                }
+            }
+        }
+        public static void Obtener_Nullable(Nodo_Generico nodo) 
+        {
+            switch (nodo.id)
+            {
+                case "|"://N= N(IZQ) || N(DER)
+                    if (nodo.hijo_derecho.nullable == true || nodo.hijo_izquierdo.nullable == true)
+                    {
+                        nodo.nullable = true;
+                    }
+                    break;
+                case "."://N= N(IZQ) && N(DER)
+                    if (nodo.hijo_derecho.nullable == true && nodo.hijo_izquierdo.nullable == true)
+                    {
+                        nodo.nullable = true;
+                    }
+                    break;
+                case "*"://N = TRUE
+                    nodo.nullable = true;
+                    break;
+                case "+"://N=N(IZQ)
+                    if (nodo.hijo_izquierdo.nullable == true)
+                    {
+                        nodo.nullable = true;
+                    }
+                    break;
+                case "?"://N = TRUE
+                    nodo.nullable = true;
+                    break;
             }
         }
     }
