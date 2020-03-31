@@ -88,10 +88,14 @@ namespace Proyecto_LFA
                         var arbol_Sintactico = Helpers.GenerarArbol(st_SINTACTICO, operadores, expresion_TokensS);
                         var contador_Hojas = 1;
                         var tabla_follow = new Dictionary<int, List<int>>();
+                        var diccionario_hojas = new Dictionary<int, string>();
                         //3. Enumerar hojas; obtener first, last & nullable
-                        Helpers.FLN(arbol_Sintactico, ref contador_Hojas, ref tabla_follow);
+                        Helpers.FLN(arbol_Sintactico, ref contador_Hojas, ref tabla_follow, ref diccionario_hojas);
                         //4. Generar tabla de follows
                         Helpers.Generar_Follow(arbol_Sintactico, ref tabla_follow);
+                        //5.Generar tabla de transiciones y estados
+                        Helpers.GenerarEstados_Transiciones(st_SINTACTICO, arbol_Sintactico.first, diccionario_hojas, tabla_follow);
+                    
                     }
 
                 }

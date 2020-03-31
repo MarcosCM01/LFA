@@ -165,17 +165,18 @@ namespace Proyecto_LFA
             return false;
         }
 
-        public static void FLN(Nodo_Generico arbol_Expresion, ref int contador, ref Dictionary<int, List<int>> follows) 
+        public static void FLN(Nodo_Generico arbol_Expresion, ref int contador, ref Dictionary<int, List<int>> follows, ref Dictionary<int, string> hojas) 
         {
             if (arbol_Expresion != null)
             {
-                FLN(arbol_Expresion.hijo_izquierdo, ref contador, ref follows);
-                FLN(arbol_Expresion.hijo_derecho, ref contador, ref follows);
+                FLN(arbol_Expresion.hijo_izquierdo, ref contador, ref follows, ref hojas);
+                FLN(arbol_Expresion.hijo_derecho, ref contador, ref follows, ref hojas);
                 if (Verificar_esHoja(arbol_Expresion) == true)
                 {
                     arbol_Expresion.numero_hoja = contador;
                     var list_Aux = new List<int>();
                     follows.Add(contador, list_Aux);
+                    hojas.Add(contador, arbol_Expresion.id);
                     //Genero First, last
                     Obtener_First(arbol_Expresion, true);
                     Obtener_Last(arbol_Expresion, true);
@@ -401,5 +402,57 @@ namespace Proyecto_LFA
             
             
         }
+        public static void GenerarEstados_Transiciones(List<string> st_SINTACTICO, List<int> first, Dictionary<int, string> diccionario_hojas, Dictionary<int, List<int>> tabla_follow) 
+        {
+            var lista_Estados = new List<List<int>>();
+            var diccionario_ET = new Dictionary<List<int>, List<List<int>>>();
+            lista_Estados.Add(first);
+            while (lista_Estados.Count>0)//Para recorrer todos los estados
+            {
+                var lista_transiciones = new List<List<int>>();
+                for (int i = 0; i < st_SINTACTICO.Count; i++)
+                {
+                    var transicion = new List<int>();
+                    for (int j = 0; j < lista_Estados[0].Count; j++)
+                    {
+                        if (diccionario_hojas[lista_Estados[0][j]] == st_SINTACTICO[i])
+                        {
+                            var tmp = tabla_follow[lista_Estados[0][j]];
+                            for (int k = 0; k < tmp.Count; k++)
+                            {
+                                if (!transicion.Contains(tmp[k]))
+                                {
+                                    transicion.Add(tmp[k]);
+                                }
+                            }
+                        }
+                    }
+                    //Ordeno mi transicion
+                    transicion.Sort();
+                    lista_transiciones.Add(transicion);
+                    //Verificar que esta transicion sea un nuevo estado
+                    var contador_iguales = 0;
+                    var contador_distintos = 0;
+                    for (int m = 0; m < lista_Estados.Count; m++)
+                    {
+                        if (transicion.Equals(lista_Estados[m]) == false)
+                        {
+                            contador_distintos++;
+                        }
+                        else
+                        {
+                            contador_iguales++;
+                        }
+                    }
+                    if (contador_iguales == 0 && contador_distintos != 0 && transicion.Count>0)
+                    {
+                        lista_Estados.Add(transicion);
+                    }
+                }
+                diccionario_ET.Add(lista_Estados[0], lista_transiciones);
+                lista_Estados.Remove(lista_Estados[0]);
+            }
+        }
+
     }
 }
