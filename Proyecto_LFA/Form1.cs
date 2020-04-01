@@ -80,6 +80,7 @@ namespace Proyecto_LFA
                     if (MensajeError.error_Encontrado == false)
                     {
                         //------------------------------> ANALIZADOR SINTACTICO
+                        //var txbER = string.Empty;
                         var error_Sintactico = false;
                         //1.Tokenizar expresion
                         var expresion_TokensS = SintacticoA.Tokenizar(Prueba.gramatica, inicioTokens, finalTokens, ref error_Sintactico);
@@ -94,7 +95,11 @@ namespace Proyecto_LFA
                         //4. Generar tabla de follows
                         Helpers.Generar_Follow(arbol_Sintactico, ref tabla_follow);
                         //5.Generar tabla de transiciones y estados
-                        Helpers.GenerarEstados_Transiciones(st_SINTACTICO, arbol_Sintactico.first, diccionario_hojas, tabla_follow);
+                        var diccionario_EstadoTransicion = Helpers.GenerarEstados_Transiciones(st_SINTACTICO, arbol_Sintactico.first, diccionario_hojas, tabla_follow);
+
+                        //6.Mostrar todo en un data grid View
+                        txbExpresion.Text = expresion_TokensS;
+                        lbl_MostrarR.Text = "Formato correcto / Tabla de Firsta, Last, Follow de acuerdo a la expresión regular ingresada, generación de la tabla de transiciones.";
                     
                     }
 

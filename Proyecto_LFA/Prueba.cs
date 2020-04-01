@@ -684,10 +684,10 @@ namespace Proyecto_LFA
         }
         
         //POSIBLES RESULTADOS
-        public static void ArchivoCorrecto()
-        {
-            MessageBox.Show("ARCHIVO DE PRUEBA SIN NINGUN ERROR");
-        }
+        //public static void ArchivoCorrecto()
+        //{
+        //    MessageBox.Show("Formato correcto. Tabla de first, last, follow ");
+        //}
         public static void MostrarError(string mensaje) //CASO NO SE CUMPLIO LA GRAMATICA
         {
             MessageBox.Show(mensaje);

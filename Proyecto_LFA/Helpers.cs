@@ -402,11 +402,13 @@ namespace Proyecto_LFA
             
             
         }
-        public static void GenerarEstados_Transiciones(List<string> st_SINTACTICO, List<int> first, Dictionary<int, string> diccionario_hojas, Dictionary<int, List<int>> tabla_follow) 
+        public static Dictionary<List<int>, List<List<int>>> GenerarEstados_Transiciones(List<string> st_SINTACTICO, List<int> first, Dictionary<int, string> diccionario_hojas, Dictionary<int, List<int>> tabla_follow) 
         {
             var lista_Estados = new List<List<int>>();
+            var lista_FiltroEstados = new List<List<int>>(); //Para no agregar repetidos
             var diccionario_ET = new Dictionary<List<int>, List<List<int>>>();
             lista_Estados.Add(first);
+            lista_FiltroEstados.Add(first);
             while (lista_Estados.Count>0)//Para recorrer todos los estados
             {
                 var lista_transiciones = new List<List<int>>();
@@ -415,9 +417,10 @@ namespace Proyecto_LFA
                     var transicion = new List<int>();
                     for (int j = 0; j < lista_Estados[0].Count; j++)
                     {
-                        if (diccionario_hojas[lista_Estados[0][j]] == st_SINTACTICO[i])
+                        var aux = lista_Estados[0];
+                        if (diccionario_hojas[aux[j]] == st_SINTACTICO[i])
                         {
-                            var tmp = tabla_follow[lista_Estados[0][j]];
+                            var tmp = tabla_follow[aux[j]];
                             for (int k = 0; k < tmp.Count; k++)
                             {
                                 if (!transicion.Contains(tmp[k]))
@@ -428,31 +431,35 @@ namespace Proyecto_LFA
                         }
                     }
                     //Ordeno mi transicion
-                    transicion.Sort();
-                    lista_transiciones.Add(transicion);
-                    //Verificar que esta transicion sea un nuevo estado
-                    var contador_iguales = 0;
-                    var contador_distintos = 0;
-                    for (int m = 0; m < lista_Estados.Count; m++)
+                    if (transicion.Count >0)
                     {
-                        if (transicion.Equals(lista_Estados[m]) == false)
+                        transicion.Sort();
+                        lista_transiciones.Add(transicion);
+                        //Verificar que esta transicion sea un nuevo estado
+                        var contador_iguales = 0;
+                        for (int m = 0; m < lista_FiltroEstados.Count; m++)
                         {
-                            contador_distintos++;
+                            if (transicion.SequenceEqual(lista_FiltroEstados[m]) == true)
+                            {
+                                contador_iguales++;
+                            }
                         }
-                        else
+                        if (contador_iguales == 0)
                         {
-                            contador_iguales++;
+                            lista_Estados.Add(transicion);
+                            lista_FiltroEstados.Add(transicion);
                         }
                     }
-                    if (contador_iguales == 0 && contador_distintos != 0 && transicion.Count>0)
+                    else
                     {
-                        lista_Estados.Add(transicion);
+                        transicion.Add(0);
+                        lista_transiciones.Add(transicion);
                     }
                 }
                 diccionario_ET.Add(lista_Estados[0], lista_transiciones);
                 lista_Estados.Remove(lista_Estados[0]);
             }
+            return diccionario_ET;
         }
-
     }
 }
