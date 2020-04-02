@@ -461,5 +461,90 @@ namespace Proyecto_LFA
             }
             return diccionario_ET;
         }
+        public static void GenerarFilas_FLN(Nodo_Generico nodo) 
+        {
+            if (nodo!=null)
+            {
+                GenerarFilas_FLN(nodo.hijo_izquierdo);
+                GenerarFilas_FLN(nodo.hijo_derecho);
+                var row = Form1.DataTableFLN.NewRow();
+                row["Simbolo"] = nodo.id;
+                var aux = string.Empty;
+                for (int i = 0; i < nodo.first.Count; i++)
+                {
+                    aux += $"{nodo.first[i]},";
+                }
+                aux = aux.Remove(aux.Length-1,1);
+                row["First"] = aux;
+                aux = string.Empty;
+                for (int i = 0; i < nodo.last.Count; i++)
+                {
+                    aux += $"{nodo.last[i]},";
+                }
+                aux = aux.Remove(aux.Length - 1, 1);
+                row["Last"] = aux;
+                aux = string.Empty;
+                if (nodo.nullable == false)
+                {
+                    row["Nullable"] = "false";
+                }
+                else
+                {
+                    row["Nullable"] = "true";
+                }
+                Form1.DataTableFLN.Rows.Add(row);
+            }
+
+        }
+        public static void GenerarFilas_FOLLOW(Dictionary<int, List<int>> diccionario_SF) 
+        {
+            foreach (var item in diccionario_SF.Keys)
+            {
+                var row = Form1.DataTableFOLLOW.NewRow();
+                row["Simbolo"] = item;
+                var aux = string.Empty;
+                for (int i = 0; i < diccionario_SF[item].Count; i++)
+                {
+                    aux += $"{diccionario_SF[item][i]},";
+                }
+                if (aux.Length>0)
+                {
+                    aux = aux.Remove(aux.Length - 1, 1);
+                }
+                else
+                {
+                    aux = "-";
+                }
+                row["Follow"] = aux;
+                aux = string.Empty;
+                Form1.DataTableFOLLOW.Rows.Add(row);
+            }
+        }
+        public static void GenerarFilas_ET(Dictionary<List<int>, List<List<int>>> estado_transicion, List<string>st) 
+        {
+            foreach (var item in estado_transicion.Keys)
+            {
+                var row = Form1.DataTableET.NewRow();
+                var aux = string.Empty;
+                for (int i = 0; i < item.Count; i++)
+                {
+                    aux += $"{item[i]},";
+                }
+                aux = aux.Remove(aux.Length-1, 1);
+                row["Estado"] = aux;
+                aux = string.Empty;
+                for (int i = 0; i < estado_transicion[item].Count; i++)
+                {
+                    for (int j = 0; j < estado_transicion[item][i].Count; j++)
+                    {
+                        aux += $"{estado_transicion[item][i][j]},";
+                    }
+                    aux = aux.Remove(aux.Length - 1, 1);
+                    row[st[i]] = aux;
+                    aux = string.Empty;
+                }
+                Form1.DataTableET.Rows.Add(row);
+            }
+        }
     }
 }

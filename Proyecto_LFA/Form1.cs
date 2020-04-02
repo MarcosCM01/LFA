@@ -45,7 +45,11 @@ namespace Proyecto_LFA
         public static List<char> st_ACTIONS = new List<char>();
         public static List<char> st_ERROR = new List<char>();
         public static List<string> st_SINTACTICO = new List<string>();
-        //public static Dictionary<int, List<int>> tabla_follow = new Dictionary<int, List<int>>();
+
+        //DataTable Estaticos 
+        public static DataTable DataTableFLN = new DataTable();
+        public static DataTable DataTableFOLLOW = new DataTable();
+        public static DataTable DataTableET = new DataTable();
 
         private void btnAnalizar_Click(object sender, EventArgs e)
         {
@@ -85,11 +89,13 @@ namespace Proyecto_LFA
                         //1.Tokenizar expresion
                         var expresion_TokensS = SintacticoA.Tokenizar(Prueba.gramatica, inicioTokens, finalTokens, ref error_Sintactico);
                         Expresiones_Regulares.ST_Sintactico(st_SINTACTICO, operadores, expresion_TokensS);
+
                         //2. Generar arbol de expresion
                         var arbol_Sintactico = Helpers.GenerarArbol(st_SINTACTICO, operadores, expresion_TokensS);
                         var contador_Hojas = 1;
                         var tabla_follow = new Dictionary<int, List<int>>();
                         var diccionario_hojas = new Dictionary<int, string>();
+
                         //3. Enumerar hojas; obtener first, last & nullable
                         Helpers.FLN(arbol_Sintactico, ref contador_Hojas, ref tabla_follow, ref diccionario_hojas);
                         //4. Generar tabla de follows
@@ -99,8 +105,31 @@ namespace Proyecto_LFA
 
                         //6.Mostrar todo en un data grid View
                         txbExpresion.Text = expresion_TokensS;
-                        lbl_MostrarR.Text = "Formato correcto / Tabla de Firsta, Last, Follow de acuerdo a la expresión regular ingresada, generación de la tabla de transiciones.";
-                    
+                        lbl_MostrarR.Text = "Formato correcto: Tablas de First, Last, Nullable, Follow, Estados y Transiciones de acuerdo a la expresión regular ingresada.";
+
+                        //TABLA 1: FLN
+                        DataTableFLN.Columns.Add("Simbolo");
+                        DataTableFLN.Columns.Add("First");
+                        DataTableFLN.Columns.Add("Last");
+                        DataTableFLN.Columns.Add("Nullable");
+                        Helpers.GenerarFilas_FLN(arbol_Sintactico);
+                        dataGV_FLN.DataSource = DataTableFLN;
+
+                        //TABLA 2: FOLLOW
+                        DataTableFOLLOW.Columns.Add("Simbolo");
+                        DataTableFOLLOW.Columns.Add("Follow");
+                        Helpers.GenerarFilas_FOLLOW(tabla_follow);
+                        dataGVFollow.DataSource = DataTableFOLLOW;
+
+                        //TABLA 3: ESTADOS Y TRANSICIONES
+                        DataTableET.Columns.Add("Estado");
+                        for (int i = 0; i < st_SINTACTICO.Count; i++)
+                        {
+                            DataTableET.Columns.Add(st_SINTACTICO[i]);
+                        }
+                        Helpers.GenerarFilas_ET(diccionario_EstadoTransicion, st_SINTACTICO);
+                        dataGVET.DataSource = DataTableET;
+                        
                     }
 
                 }
