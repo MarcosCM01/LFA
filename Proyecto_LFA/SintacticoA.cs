@@ -49,9 +49,10 @@ namespace Proyecto_LFA
                         }
                     }
                     var linea = elemento.Split('=');
-                    var trim_chars = new char[] { ' ', '\t' };
-                    elemento = linea[1].Trim(trim_chars);
+                    elemento = linea[1];
                 }
+                var trim_chars = new char[] { ' ', '\t' };
+                elemento = elemento.Trim(trim_chars);
                 listaAux.Add(elemento);
             }
             //En este ciclo, se procede a tokenizar
@@ -78,6 +79,7 @@ namespace Proyecto_LFA
                                     MensajeError.mensaje_Error = $"La palabra {verificador} no ha sido declarada como set previamente";
                                     Prueba.MostrarError(MensajeError.mensaje_Error);
                                     MensajeError.error_Encontrado = true;
+                                    error_Encontrado = true;
                                 }
                             }
                         }

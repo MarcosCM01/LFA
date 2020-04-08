@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
 using System.IO;
 
 namespace Proyecto_LFA
@@ -51,6 +52,8 @@ namespace Proyecto_LFA
         public static DataTable DataTableFOLLOW = new DataTable();
         public static DataTable DataTableET = new DataTable();
 
+        //ARBOL
+        public static Nodo_Generico arbol_Sintactico = new Nodo_Generico("-");
         private void btnAnalizar_Click(object sender, EventArgs e)
         {
             if (txbRuta.Text != "")// si no hay ruta del archivo
@@ -88,48 +91,53 @@ namespace Proyecto_LFA
                         var error_Sintactico = false;
                         //1.Tokenizar expresion
                         var expresion_TokensS = SintacticoA.Tokenizar(Prueba.gramatica, inicioTokens, finalTokens, ref error_Sintactico);
-                        Expresiones_Regulares.ST_Sintactico(st_SINTACTICO, operadores, expresion_TokensS);
-
-                        //2. Generar arbol de expresion
-                        var arbol_Sintactico = Helpers.GenerarArbol(st_SINTACTICO, operadores, expresion_TokensS);
-                        var contador_Hojas = 1;
-                        var tabla_follow = new Dictionary<int, List<int>>();
-                        var diccionario_hojas = new Dictionary<int, string>();
-
-                        //3. Enumerar hojas; obtener first, last & nullable
-                        Helpers.FLN(arbol_Sintactico, ref contador_Hojas, ref tabla_follow, ref diccionario_hojas);
-                        //4. Generar tabla de follows
-                        Helpers.Generar_Follow(arbol_Sintactico, ref tabla_follow);
-                        //5.Generar tabla de transiciones y estados
-                        var diccionario_EstadoTransicion = Helpers.GenerarEstados_Transiciones(st_SINTACTICO, arbol_Sintactico.first, diccionario_hojas, tabla_follow);
-
-                        //6.Mostrar todo en un data grid View
-                        txbExpresion.Text = expresion_TokensS;
-                        lbl_MostrarR.Text = "Formato correcto: Tablas de First, Last, Nullable, Follow, Estados y Transiciones de acuerdo a la expresión regular ingresada.";
-
-                        //TABLA 1: FLN
-                        DataTableFLN.Columns.Add("Simbolo");
-                        DataTableFLN.Columns.Add("First");
-                        DataTableFLN.Columns.Add("Last");
-                        DataTableFLN.Columns.Add("Nullable");
-                        Helpers.GenerarFilas_FLN(arbol_Sintactico);
-                        dataGV_FLN.DataSource = DataTableFLN;
-
-                        //TABLA 2: FOLLOW
-                        DataTableFOLLOW.Columns.Add("Simbolo");
-                        DataTableFOLLOW.Columns.Add("Follow");
-                        Helpers.GenerarFilas_FOLLOW(tabla_follow);
-                        dataGVFollow.DataSource = DataTableFOLLOW;
-
-                        //TABLA 3: ESTADOS Y TRANSICIONES
-                        DataTableET.Columns.Add("Estado");
-                        for (int i = 0; i < st_SINTACTICO.Count; i++)
+                        if (error_Sintactico != true)
                         {
-                            DataTableET.Columns.Add(st_SINTACTICO[i]);
+                            Expresiones_Regulares.ST_Sintactico(st_SINTACTICO, operadores, expresion_TokensS);
+                            //2. Generar arbol de expresion
+                            arbol_Sintactico = Helpers.GenerarArbol(st_SINTACTICO, operadores, expresion_TokensS);
+                            var contador_Hojas = 1;
+                            var tabla_follow = new Dictionary<int, List<int>>();
+                            var diccionario_hojas = new Dictionary<int, string>();
+
+                            //3. Enumerar hojas; obtener first, last & nullable
+                            Helpers.FLN(arbol_Sintactico, ref contador_Hojas, ref tabla_follow, ref diccionario_hojas);
+                            //4. Generar tabla de follows
+                            Helpers.Generar_Follow(arbol_Sintactico, ref tabla_follow);
+                            //5.Generar tabla de transiciones y estados
+                            var diccionario_EstadoTransicion = Helpers.GenerarEstados_Transiciones(st_SINTACTICO, arbol_Sintactico.first, diccionario_hojas, tabla_follow);
+
+                            //6.Mostrar todo en un data grid View
+                            txbExpresion.Text = expresion_TokensS;
+                            lbl_MostrarR.Text = "Formato correcto: Tablas de First, Last, Nullable, Follow, Estados y Transiciones de acuerdo a la expresión regular ingresada.";
+
+                            //TABLA 1: FLN
+                            DataTableFLN.Columns.Add("Simbolo");
+                            DataTableFLN.Columns.Add("First");
+                            DataTableFLN.Columns.Add("Last");
+                            DataTableFLN.Columns.Add("Nullable");
+                            Helpers.GenerarFilas_FLN(arbol_Sintactico);
+                            dataGV_FLN.DataSource = DataTableFLN;
+
+                            //TABLA 2: FOLLOW
+                            DataTableFOLLOW.Columns.Add("Simbolo");
+                            DataTableFOLLOW.Columns.Add("Follow");
+                            Helpers.GenerarFilas_FOLLOW(tabla_follow);
+                            dataGVFollow.DataSource = DataTableFOLLOW;
+
+                            //TABLA 3: ESTADOS Y TRANSICIONES
+                            DataTableET.Columns.Add("Estado");
+                            for (int i = 0; i < st_SINTACTICO.Count; i++)
+                            {
+                                DataTableET.Columns.Add(st_SINTACTICO[i]);
+                            }
+                            Helpers.GenerarFilas_ET(diccionario_EstadoTransicion, st_SINTACTICO);
+                            dataGVET.DataSource = DataTableET;
+
+                            //EXTRA----> DIBUJAR EL ARBOL
+                            //FormArbol.DibujarArbol(arbol_Sintactico, 0);
+
                         }
-                        Helpers.GenerarFilas_ET(diccionario_EstadoTransicion, st_SINTACTICO);
-                        dataGVET.DataSource = DataTableET;
-                        
                     }
 
                 }
@@ -142,6 +150,12 @@ namespace Proyecto_LFA
             {
                 MessageBox.Show("Por favor, primero seleccione un archivo");
             }
+        }
+        public static Thread th;
+        private void btnArbol_Click(object sender, EventArgs e)
+        {
+            var nuevoForm = new FormArbol();
+            nuevoForm.Show();
         }
     }
 }

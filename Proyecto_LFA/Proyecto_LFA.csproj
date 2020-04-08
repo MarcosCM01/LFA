@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Arbol.cs" />
     <Compile Include="Arbol_Expresiones.cs" />
     <Compile Include="Expresiones_Regulares.cs" />
     <Compile Include="Form1.cs">
@@ -53,6 +54,12 @@
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormArbol.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormArbol.Designer.cs">
+      <DependentUpon>FormArbol.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers.cs" />
     <Compile Include="Nodo.cs" />
@@ -63,6 +70,9 @@
     <Compile Include="SintacticoA.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormArbol.resx">
+      <DependentUpon>FormArbol.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

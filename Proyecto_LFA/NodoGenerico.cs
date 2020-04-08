@@ -19,6 +19,9 @@ namespace Proyecto_LFA
         public List<int> first { get; set; }
         public List<int> last { get; set; }
 
+        public int posX { get; set; }
+        public int posY { get; set; }
+
         //First, Last, Annulable
 
         public Nodo_Generico(string value) //Metodo constructor
@@ -31,6 +34,8 @@ namespace Proyecto_LFA
             this.nullable = false;
             this.first = new List<int>();
             this.last = new List<int>();
+            this.posX = 0;
+            this.posY = 0;
             id = value;
         }
     }

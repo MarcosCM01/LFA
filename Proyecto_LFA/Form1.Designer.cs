@@ -43,6 +43,7 @@
             this.dataGV_FLN = new System.Windows.Forms.DataGridView();
             this.dataGVFollow = new System.Windows.Forms.DataGridView();
             this.dataGVET = new System.Windows.Forms.DataGridView();
+            this.btnArbol = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGV_FLN)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGVFollow)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGVET)).BeginInit();
@@ -114,7 +115,7 @@
             // 
             this.lbl_TituloER.AutoSize = true;
             this.lbl_TituloER.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_TituloER.Location = new System.Drawing.Point(581, 111);
+            this.lbl_TituloER.Location = new System.Drawing.Point(323, 121);
             this.lbl_TituloER.Name = "lbl_TituloER";
             this.lbl_TituloER.Size = new System.Drawing.Size(286, 24);
             this.lbl_TituloER.TabIndex = 6;
@@ -201,12 +202,25 @@
             this.dataGVET.Size = new System.Drawing.Size(570, 338);
             this.dataGVET.TabIndex = 14;
             // 
+            // btnArbol
+            // 
+            this.btnArbol.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnArbol.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnArbol.Location = new System.Drawing.Point(855, 121);
+            this.btnArbol.Name = "btnArbol";
+            this.btnArbol.Size = new System.Drawing.Size(143, 31);
+            this.btnArbol.TabIndex = 15;
+            this.btnArbol.Text = "Ver Arbol";
+            this.btnArbol.UseVisualStyleBackColor = false;
+            this.btnArbol.Click += new System.EventHandler(this.btnArbol_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.ClientSize = new System.Drawing.Size(1582, 603);
+            this.Controls.Add(this.btnArbol);
             this.Controls.Add(this.dataGVET);
             this.Controls.Add(this.dataGVFollow);
             this.Controls.Add(this.dataGV_FLN);
@@ -249,6 +263,7 @@
         private System.Windows.Forms.DataGridView dataGV_FLN;
         private System.Windows.Forms.DataGridView dataGVFollow;
         private System.Windows.Forms.DataGridView dataGVET;
+        private System.Windows.Forms.Button btnArbol;
     }
 }
 
