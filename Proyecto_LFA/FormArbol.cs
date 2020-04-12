@@ -24,11 +24,26 @@ namespace Proyecto_LFA
             this.Close();
         }
 
-        private void FormArbol_Click(object sender, EventArgs e)
+        private void btnGraficar_Click(object sender, EventArgs e)
         {
+            var tempX = pictureBox1.Width*2;
+            var tempY = pictureBox1.Height;
+            ObtenerTamañoPicture(Form1.arbol_Sintactico, ref tempX, ref tempY);
+            pictureBox1.Width = tempX;
+            pictureBox1.Height = tempY;
             var arbol = new Arbol(pictureBox1);
             arbol.DibujarArbol(Form1.arbol_Sintactico, 0);
         }
+
+       public void ObtenerTamañoPicture(Nodo_Generico nodo, ref int x, ref int y) 
+       {
+            if (nodo != null)
+            {
+                x += 275;
+                y += 150;
+                ObtenerTamañoPicture(nodo.hijo_izquierdo, ref x, ref y);
+            }
+       }
 
     }
 }
