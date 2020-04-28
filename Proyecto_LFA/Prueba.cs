@@ -23,7 +23,6 @@ namespace Proyecto_LFA
         public static List<string> ListaOriginal = new List<string>();//PARA LINEA DE ERROR
         public static bool ArchivoVacio(string direccion)// verifica que el aechivo este vacio
         {
-            //var result = gramatica.Find(x => );
             FileInfo propiedades = new FileInfo(direccion);
             if (propiedades.Length > 0)
             {
@@ -49,7 +48,7 @@ namespace Proyecto_LFA
             }
             return false;
         }
-        public static void LeerArchivo(string rutaFile, Nodo arbol_Sets, Nodo arbol_Tokens, Nodo arbol_Actions, Nodo arbol_Error)
+        public static void Analizador_Lexico(string rutaFile, Nodo arbol_Sets, Nodo arbol_Tokens, Nodo arbol_Actions, Nodo arbol_Error, ref int inicioTokens, ref int finalTokens)
         {
             //variables auxiliares
             var line = string.Empty;
@@ -98,6 +97,8 @@ namespace Proyecto_LFA
                     break;
             }
             var i = 1;
+            var inicioSets = i;
+            var finalSets = i;
             if (MensajeError.error_Encontrado == false)//NO EXISTIO ERROR AL INICIO
             {
                 var inicio_Gramatica = i;
@@ -113,6 +114,7 @@ namespace Proyecto_LFA
                             no_columnaError = 0;
                             CompararArbol(arbol_Sets, gramatica[i], ref no_columnaError, Form1.st_SETS, i);
                             i++;
+                            finalSets++;
                         }
                         else
                         {
@@ -129,10 +131,14 @@ namespace Proyecto_LFA
                     }
                     inicio_Gramatica = i;
                 }
+                SintacticoA.ObtenerListaSETS(gramatica, inicioSets, finalSets);
+                //---------------INICIO ANALISIS DE TOKENS
                 var LineaTokensLeida = false;
+                inicioTokens = i;
+                finalTokens = i;
                 while (gramatica[i].Contains("ACTIONS") == false && MensajeError.error_Encontrado == false)
                 {
-                    if (LineaTokensLeida == false && primer_Caracter == 'S')
+                    if (LineaTokensLeida == false && primer_Caracter == 'S')//SI EL ARCHIVO INICIA CON LA SECCION DE SETS, SE DEBE DE ANALIZAR LA PALABRA RESERVADA TOKENS
                     {
                         if (Analizador_Reservada(reservada_TOKENS, gramatica[i].ToCharArray(), 0, ref no_columnaError, 1) != true)
                         {
@@ -141,6 +147,8 @@ namespace Proyecto_LFA
                         }
                         LineaTokensLeida = true;
                         i++;
+                        inicioTokens++;
+                        finalTokens++;
                     }
                     else
                     {
@@ -155,6 +163,7 @@ namespace Proyecto_LFA
                             no_columnaError = 0;
                             CompararArbol(arbol_Tokens, gramatica[i], ref no_columnaError, Form1.st_TOKENS, i);
                             i++;
+                            finalTokens++;
                         }
                         else
                         {
@@ -173,13 +182,14 @@ namespace Proyecto_LFA
                         }
                     }
                 }
+                //FINAL ANALISIS DE TOKEN
                 if (i - inicio_Gramatica == 0 && MensajeError.error_Encontrado == false)//ERROR. NO VINO NINGUN TOKEN
                 {
                     MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, COLUMNA {no_columnaError}: NO VENIA NINGUN TOKEN DEFINIDO DEFINIDO.";
                     MensajeError.error_Encontrado = true;
                     MostrarError(MensajeError.mensaje_Error);
                 }
-
+                //INICIO - ANALISIS RESERVADAS
                 if (Analizador_Reservada(reservada_ACTIONS, gramatica[i].ToCharArray(), 0, ref no_columnaError, i) == true && MensajeError.error_Encontrado == false)
                 {
                     no_columnaError = 0;
@@ -317,10 +327,10 @@ namespace Proyecto_LFA
                     }
                 }
             }
-            if (MensajeError.error_Encontrado == false && i== gramatica.Count)
-            {
-                ArchivoCorrecto();
-            }
+            //if (MensajeError.error_Encontrado == false && i== gramatica.Count)
+            //{
+            //    ArchivoCorrecto();
+            //}
         }
         public static bool Analizador_Reservada(char[] reservada, char[] linea, int contador, ref int no_columnaError, int linea_Error)
         {
@@ -674,10 +684,10 @@ namespace Proyecto_LFA
         }
         
         //POSIBLES RESULTADOS
-        public static void ArchivoCorrecto()
-        {
-            MessageBox.Show("ARCHIVO DE PRUEBA SIN NINGUN ERROR");
-        }
+        //public static void ArchivoCorrecto()
+        //{
+        //    MessageBox.Show("Formato correcto. Tabla de first, last, follow ");
+        //}
         public static void MostrarError(string mensaje) //CASO NO SE CUMPLIO LA GRAMATICA
         {
             MessageBox.Show(mensaje);
