@@ -73,6 +73,10 @@ namespace Proyecto_LFA
                                 {
                                     verificador += item[i];
                                     i++;
+                                    if (i == item.Length)
+                                    {
+                                        break;
+                                    }
                                 }
                                 if (VerificandoSet(verificador) != true)
                                 {
