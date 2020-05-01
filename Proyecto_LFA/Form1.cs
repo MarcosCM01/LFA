@@ -52,6 +52,11 @@ namespace Proyecto_LFA
         public static DataTable DataTableFOLLOW = new DataTable();
         public static DataTable DataTableET = new DataTable();
 
+        public static int SimboloTerminal = 0;
+
+        //DATOS ESTATICOS
+        public static Dictionary<List<int>, List<List<int>>> diccionario_EstadoTransicion = new Dictionary<List<int>, List<List<int>>>();
+
         //ARBOL
         public static Nodo_Generico arbol_Sintactico = new Nodo_Generico("-");
         private void btnAnalizar_Click(object sender, EventArgs e)
@@ -81,9 +86,9 @@ namespace Proyecto_LFA
                     var inicioTokens = 0;
                     var finalTokens = 0;
 
-                    //ANALIZADOR LEXICO
                     Prueba.Analizador_Lexico(txbRuta.Text, arbol_SETS, arbol_TOKENS, arbol_ACTIONS, arbol_ERROR, ref inicioTokens, ref finalTokens);//LOGICA PARA LECTURA DEL ARCHIVO
 
+                    //INICIO FASE II
                     if (MensajeError.error_Encontrado == false)
                     {
                         //------------------------------> ANALIZADOR SINTACTICO
@@ -105,8 +110,8 @@ namespace Proyecto_LFA
                             //4. Generar tabla de follows
                             Helpers.Generar_Follow(arbol_Sintactico, ref tabla_follow);
                             //5.Generar tabla de transiciones y estados
-                            var diccionario_EstadoTransicion = Helpers.GenerarEstados_Transiciones(st_SINTACTICO, arbol_Sintactico.first, diccionario_hojas, tabla_follow);
-
+                            diccionario_EstadoTransicion = Helpers.GenerarEstados_Transiciones(st_SINTACTICO, arbol_Sintactico.first, diccionario_hojas, tabla_follow);
+                            SimboloTerminal = tabla_follow.Count;
                             //6.Mostrar todo en un data grid View
                             txbExpresion.Text = expresion_TokensS;
                             lbl_MostrarR.Text = "Formato correcto: Tablas de First, Last, Nullable, Follow, Estados y Transiciones de acuerdo a la expresión regular ingresada.";
@@ -134,12 +139,8 @@ namespace Proyecto_LFA
                             Helpers.GenerarFilas_ET(diccionario_EstadoTransicion, st_SINTACTICO);
                             dataGVET.DataSource = DataTableET;
 
-                            //EXTRA----> DIBUJAR EL ARBOL
-                            //FormArbol.DibujarArbol(arbol_Sintactico, 0);
-
                         }
                     }
-
                 }
                 else
                 {
@@ -156,6 +157,19 @@ namespace Proyecto_LFA
         {
             var nuevoForm = new FormArbol();
             nuevoForm.Show();
+        }
+
+        private void btnGenerar_Click(object sender, EventArgs e)
+        {
+            //INICIO FASE III ---GENERADOR DE SCANNER
+            if (diccionario_EstadoTransicion.Count != 0)
+            {
+                Automata.EscribirNuevaSolucion();
+            }
+            else
+            {
+                MessageBox.Show("No se ha realizado previo análisis");
+            }
         }
     }
 }

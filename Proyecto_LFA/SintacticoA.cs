@@ -11,6 +11,8 @@ namespace Proyecto_LFA
         public static List<string> TokensList = new List<string>();//Lista que contiene tokens ya para la creacion de un arbol
         public static List<string> SetsList = new List<string>();//Lista que contiene los SETS declarados para manejo de operaciones
         public static List<char> Operadoresist = new List<char>();//Lista que contiene los operadores declarados para manejo de operaciones
+
+        public static Dictionary<string, string> Definicion_SETS = new Dictionary<string, string>(); 
         public static string Tokenizar(List<string> seccionTokens, int inicioTokens, int finTokens, ref bool error_Encontrado) 
         {
             var listaAux = new List<string>();
@@ -44,7 +46,7 @@ namespace Proyecto_LFA
                             if (elemento[j] == '{')
                             {
                                 var count = elemento.Length - j;
-                                elemento = elemento.Remove(j, count - 1);
+                                elemento = elemento.Remove(j, count);
                             }
                         }
                     }
@@ -178,6 +180,7 @@ namespace Proyecto_LFA
             for (int i = inicioSETS; i < finalSETS; i++)
             {
                 var linea = seccionSETS[i].Split('=');
+                Definicion_SETS.Add(linea[0].Trim(' '), linea[1].Trim(' '));
                 var elemento = linea[0].Trim(' ');
                 SetsList.Add(elemento);
             }

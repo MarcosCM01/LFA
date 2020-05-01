@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Arbol.cs" />
     <Compile Include="Arbol_Expresiones.cs" />
+    <Compile Include="Automata.cs" />
     <Compile Include="Expresiones_Regulares.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
