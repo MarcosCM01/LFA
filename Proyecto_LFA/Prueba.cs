@@ -202,6 +202,7 @@ namespace Proyecto_LFA
                         {
                             i++;
                             var contador_Actions = i;
+                            var final_actions = i;
                             while (gramatica[i].Contains("}") == false && i < gramatica.Count && MensajeError.error_Encontrado == false)
                             {
                                 no_columnaError = 0;
@@ -210,6 +211,7 @@ namespace Proyecto_LFA
                                 {
                                     CompararArbol(arbol_Actions, gramatica[i], ref no_columnaError, Form1.st_ACTIONS, i);
                                     i++;
+                                    final_actions++;
                                 }
                                 else
                                 {
@@ -218,6 +220,7 @@ namespace Proyecto_LFA
                                     MostrarError(MensajeError.mensaje_Error);
                                 }
                             }
+                            SintacticoA.LlenarDiccionarioActions(gramatica, contador_Actions, final_actions);
                             if (i - contador_Actions == 0 || i == gramatica.Count && MensajeError.error_Encontrado == false)
                             {
                                 MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, COLUMNA {1}: NO VENIA LA LLAVE FINAL";
@@ -259,6 +262,7 @@ namespace Proyecto_LFA
                         {
                             i++;
                             var contador_Actions = i;
+                            var final_actions = i;
                             while (gramatica[i].Contains("}") == false && i < gramatica.Count && MensajeError.error_Encontrado == false)
                             {
                                 no_columnaError = 0;
@@ -267,6 +271,7 @@ namespace Proyecto_LFA
                                 {
                                     CompararArbol(arbol_Actions, gramatica[i], ref no_columnaError, Form1.st_ACTIONS, i);
                                     i++;
+                                    final_actions++;
                                 }
                                 else
                                 {
@@ -275,6 +280,7 @@ namespace Proyecto_LFA
                                     MostrarError(MensajeError.mensaje_Error);
                                 }
                             }
+                            SintacticoA.LlenarDiccionarioActions(gramatica, contador_Actions, final_actions);
                             if (i - contador_Actions == 0 || i == gramatica.Count && MensajeError.error_Encontrado == false)
                             {
                                 MensajeError.mensaje_Error = $"ERROR EN LA LINEA {DevolverLineaError(gramatica[i])}, COLUMNA {1}: NO VENIA LA LLAVE FINAL";

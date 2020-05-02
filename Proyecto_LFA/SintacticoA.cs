@@ -10,8 +10,7 @@ namespace Proyecto_LFA
     {
         public static List<string> TokensList = new List<string>();//Lista que contiene tokens ya para la creacion de un arbol
         public static List<string> SetsList = new List<string>();//Lista que contiene los SETS declarados para manejo de operaciones
-        public static List<char> Operadoresist = new List<char>();//Lista que contiene los operadores declarados para manejo de operaciones
-
+        public static Dictionary<string, string> DiccionarioActions = new Dictionary<string, string>(); //PARA LA FASE III
         public static Dictionary<string, string> Definicion_SETS = new Dictionary<string, string>(); 
         public static string Tokenizar(List<string> seccionTokens, int inicioTokens, int finTokens, ref bool error_Encontrado) 
         {
@@ -192,6 +191,14 @@ namespace Proyecto_LFA
                 return true;
             }
             return false;
+        }
+        public static void LlenarDiccionarioActions(List<string> gramatica,int inicio, int fin) 
+        {
+            for (int i = inicio; i < fin; i++)
+            {
+                var tmp = gramatica[i].Split('=');
+                DiccionarioActions.Add(tmp[0], tmp[1].Trim('\''));
+            }
         }
     }
 }

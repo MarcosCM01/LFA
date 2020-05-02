@@ -28,18 +28,20 @@ namespace Proyecto_LFA
                 writer.WriteLine("{");
                 writer.WriteLine("      public class program");
                 writer.WriteLine("      {");
-                writer.WriteLine("          public static string cadena = string.Empty;");
+                writer.WriteLine("          public static string cadena = string.Empty; //variable donde se almacena la cadena ingresada por el usuario");
                 writer.WriteLine("          public static List<int> Estados_Aceptacion = new List<int>();");
+                writer.WriteLine("          public static Dictionary<string, string> Diccionario_actions = new Dictionary<string, string>();");
                 writer.WriteLine("          static void Main(string[] args)");
                 writer.WriteLine("          {");
                 writer.WriteLine("              Console.WriteLine(\"INGRESAR CADENA A EVALUAR MEDIANTE SCANNER\");");
                 writer.WriteLine("              cadena = Console.ReadLine();");
                 writer.WriteLine("              LlenarListaAceptados();");
+                writer.WriteLine("              LlenarDiccionarioActions();");
                 writer.WriteLine("              var resultado_cadena = EvaluarCadena(cadena);");
                 writer.WriteLine("              if(resultado_cadena == true) //Toda la cadena es aceptada");
                 writer.WriteLine("              {");
                 writer.WriteLine("                  Console.WriteLine(\"La cadena fue aceptada \");");
-                writer.WriteLine("                  MostrarComponentesLexicos(vectorPalabras);");
+                writer.WriteLine("                  MostrarComponentesLexicos(cadena.Split(' '));");
                 writer.WriteLine("              }");
                 writer.WriteLine("              else");
                 writer.WriteLine("              {");
@@ -125,7 +127,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("          {");
                                                 for (int i = 0; i < Estados_Aceptacion.Count; i++)
                                                 {
-                                                    writer.WriteLine($"                 Estados_Aceptacion.Add({Estados_Aceptacion[i]});");
+                writer.WriteLine($"                 Estados_Aceptacion.Add({Estados_Aceptacion[i]});");
                                                 }
                 writer.WriteLine("          }");
                 writer.WriteLine("          public static bool ComprobarEstado(int estado)");
@@ -135,6 +137,39 @@ namespace Proyecto_LFA
                 writer.WriteLine("                 return true;");
                 writer.WriteLine("              }");
                 writer.WriteLine("              return false;");
+                writer.WriteLine("          }");
+                writer.WriteLine("      }");
+                writer.WriteLine("          public static void MostrarComponentesLexicos(string[] palabra)");
+                writer.WriteLine("          {");
+                writer.WriteLine("              for(int i=0; i < palabra.Length; i++)");
+                writer.WriteLine("              {");
+                writer.WriteLine("                 var tmp = palabra[i];");
+                writer.WriteLine("                 if(BuscarCadena_DiccionarioActions(tmp) == false);");
+                writer.WriteLine("                 {");
+                writer.WriteLine("                      //BuscarCadena_Tokens();");
+                writer.WriteLine("                 }");
+                writer.WriteLine("              }");
+                writer.WriteLine("              return false;");
+                writer.WriteLine("          }");
+                writer.WriteLine("          public static void LlenarDiccionarioActions()");
+                writer.WriteLine("          {");
+                                                foreach (var item in SintacticoA.DiccionarioActions.Keys)
+                                                {
+                writer.WriteLine($"                 Diccionario_actions.Add({item},{SintacticoA.DiccionarioActions[item]});");
+                                                }
+                writer.WriteLine("          }");
+                writer.WriteLine("          public static bool BuscarCadena_DiccionarioActions(tmp)");
+                writer.WriteLine("          {");
+                writer.WriteLine("              var bandera = false;");
+                writer.WriteLine("              foreach (var item in Diccionario_actions.Keys)");
+                writer.WriteLine("              {");
+                writer.WriteLine("                  if(tmp == Diccionario_actions[item])");
+                writer.WriteLine("                  {");
+                writer.WriteLine("                      Console.WriteLine($\"{tmp} = {item}\");");
+                writer.WriteLine("                      bandera = true;");
+                writer.WriteLine("                  }");
+                writer.WriteLine("              }");
+                writer.WriteLine("              return bandera;");
                 writer.WriteLine("          }");
                 writer.WriteLine("      }");
                 writer.WriteLine("}");
