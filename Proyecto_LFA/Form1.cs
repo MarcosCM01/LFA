@@ -165,6 +165,7 @@ namespace Proyecto_LFA
             if (diccionario_EstadoTransicion.Count != 0)
             {
                 Automata.EscribirNuevaSolucion();
+                MessageBox.Show("PROGRAMA GENERADO!");
             }
             else
             {
