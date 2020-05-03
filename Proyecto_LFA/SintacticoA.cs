@@ -10,6 +10,7 @@ namespace Proyecto_LFA
     {
         public static List<string> TokensList = new List<string>();//Lista que contiene tokens ya para la creacion de un arbol
         public static List<string> SetsList = new List<string>();//Lista que contiene los SETS declarados para manejo de operaciones
+        public static List<string> ErrorList = new List<string>();
         public static Dictionary<string, string> DiccionarioActions = new Dictionary<string, string>(); //PARA LA FASE III
         public static Dictionary<string, string> Definicion_SETS = new Dictionary<string, string>();
         public static Dictionary<string, string> Definicion_Tokens = new Dictionary<string, string>();
@@ -215,7 +216,14 @@ namespace Proyecto_LFA
             for (int i = inicio; i < fin; i++)
             {
                 var tmp = gramatica[i].Split('=');
-                DiccionarioActions.Add(tmp[0], tmp[1].Trim('\''));
+                DiccionarioActions.Add(tmp[0].Trim(' '), tmp[1].Trim('\'', ' '));
+            }
+        }
+        public static void LlenrListaErrores(List<string> gramatica, int inicio, int fin) 
+        {
+            for (int i = inicio; i < fin; i++)
+            {
+                ErrorList.Add(gramatica[i]);
             }
         }
     }

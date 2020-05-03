@@ -253,7 +253,7 @@ namespace Proyecto_LFA
                     MostrarError(MensajeError.mensaje_Error);
                 }
                 //PARA MAS FUNCIONES
-                while (gramatica[i].Contains("ERROR") == false && i < gramatica.Count && MensajeError.error_Encontrado == false)
+                while (!gramatica[i].Contains("ERROR") && i < gramatica.Count && MensajeError.error_Encontrado == false)
                 {
                     if (gramatica[i].Contains('(') && gramatica[i].Contains(')'))
                     {
@@ -315,6 +315,7 @@ namespace Proyecto_LFA
                 //ESTO ES PARA LOS ERRORES
                 if (i < gramatica.Count)
                 {
+                    var fin_Error = i;
                     while (i < gramatica.Count && MensajeError.error_Encontrado == false)
                     {
                         var filtro = gramatica[i].ToCharArray();
@@ -331,6 +332,13 @@ namespace Proyecto_LFA
                             MostrarError(MensajeError.mensaje_Error);
                         }
                     }
+                    SintacticoA.LlenrListaErrores(gramatica, fin_Error, i);
+                }
+                else
+                {
+                    MensajeError.mensaje_Error = $"ERROR EN LA LINEA {i}, COLUMNA 0: NO VENIA DECLARADO NINGUN ERROR";
+                    MensajeError.error_Encontrado = true;
+                    MostrarError(MensajeError.mensaje_Error);
                 }
             }
             //if (MensajeError.error_Encontrado == false && i== gramatica.Count)

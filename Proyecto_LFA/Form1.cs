@@ -61,7 +61,7 @@ namespace Proyecto_LFA
         public static Nodo_Generico arbol_Sintactico = new Nodo_Generico("-");
         private void btnAnalizar_Click(object sender, EventArgs e)
         {
-            if (txbRuta.Text != "")// si no hay ruta del archivo
+            if (txbRuta.Text != "" || MensajeError.error_Encontrado == false)// si no hay ruta del archivo
             {
                 if (Prueba.ArchivoVacio(txbRuta.Text) != false) //el archivo no esta vacio
                 {

@@ -30,24 +30,34 @@ namespace Proyecto_LFA
                 writer.WriteLine("      {");
                 writer.WriteLine("          public static string cadena = string.Empty; //variable donde se almacena la cadena ingresada por el usuario");
                 writer.WriteLine("          public static List<int> Estados_Aceptacion = new List<int>();");
+                writer.WriteLine("          public static List<string> Error_List = new List<string>();");
                 writer.WriteLine("          public static Dictionary<string, string> Diccionario_actions = new Dictionary<string, string>();");
                 writer.WriteLine("          public static Dictionary<string, string> Definicion_Tokens = new Dictionary<string, string>();");
                 writer.WriteLine("          static void Main(string[] args)");
                 writer.WriteLine("          {");
                 writer.WriteLine("              Console.WriteLine(\"INGRESAR CADENA A EVALUAR MEDIANTE SCANNER\");");
                 writer.WriteLine("              cadena = Console.ReadLine();");
-                writer.WriteLine("              LlenarListaAceptados();");
-                writer.WriteLine("              LlenarDiccionarioActions();");
-                writer.WriteLine("              LlenarDiccionario_DefinicionTokens();");
-                writer.WriteLine("              var resultado_cadena = EvaluarCadena(cadena);");
-                writer.WriteLine("              if(resultado_cadena == true) //Toda la cadena es aceptada");
+                writer.WriteLine("              if(cadena.Length > 0)");
                 writer.WriteLine("              {");
-                writer.WriteLine("                  Console.WriteLine(\"La cadena fue aceptada.\");");
-                writer.WriteLine("                  MostrarComponentesLexicos(cadena.Split(' '));");
+                writer.WriteLine("                  LlenarListaAceptados();");
+                writer.WriteLine("                  LlenarDiccionarioActions();");
+                writer.WriteLine("                  LlenarDiccionario_DefinicionTokens();");
+                writer.WriteLine("                  Llenar_ListaErrores();");
+                writer.WriteLine("                  var resultado_cadena = EvaluarCadena(cadena);");
+                writer.WriteLine("                  if(resultado_cadena == true) //Toda la cadena es aceptada");
+                writer.WriteLine("                  {");
+                writer.WriteLine("                      Console.WriteLine(\"La cadena fue aceptada.\");");
+                writer.WriteLine("                      MostrarComponentesLexicos(cadena.Split(' '));");
+                writer.WriteLine("                  }");
+                writer.WriteLine("                  else");
+                writer.WriteLine("                  {");
+                writer.WriteLine("                      Console.WriteLine(\"La cadena no fue aceptada.\");");
+                writer.WriteLine("                      Console.WriteLine($\"{Error_List[0]}\");");
+                writer.WriteLine("                  }");
                 writer.WriteLine("              }");
                 writer.WriteLine("              else");
                 writer.WriteLine("              {");
-                writer.WriteLine("                  Console.WriteLine(\" La cadena no fue aceptada \");");
+                writer.WriteLine("                      Console.WriteLine(\"No se puede realizar analisis de una cadena vacia\");");
                 writer.WriteLine("              }");
                 writer.WriteLine("              Console.ReadKey();");
                 writer.WriteLine("          }");
@@ -153,8 +163,14 @@ namespace Proyecto_LFA
                 writer.WriteLine("                      if(IgualarCadena_DefinicionTokens(tmp) == false)//Metodo para ver si es una definicion exacta de un token");
                 writer.WriteLine("                      {");
                 writer.WriteLine("                          var token_ST = DevolverLista_enSETS(tmp);");
-                //PASO FINAL
-                writer.WriteLine("                          ImprimirTokens_ConLista(token_ST, tmp);");
+                writer.WriteLine("                          if(token_ST.Count == 0)//El estado inicial es de aceptacion, pero no encontrara su TOKEN");
+                writer.WriteLine("                          {");
+                writer.WriteLine("                              Console.WriteLine($\"Debido a la gramatica, el estado inicial es de aceptacion, pero la cadena {tmp} no existe definicion\");");
+                writer.WriteLine("                          }");
+                writer.WriteLine("                          else");
+                writer.WriteLine("                          {");
+                writer.WriteLine("                              ImprimirTokens_ConLista(token_ST, tmp);");
+                writer.WriteLine("                          }");
                 writer.WriteLine("                      }");
                 writer.WriteLine("                 }");
                 writer.WriteLine("              }");
@@ -171,6 +187,13 @@ namespace Proyecto_LFA
                 foreach (var item in SintacticoA.Definicion_Tokens.Keys)
                 {
                     writer.WriteLine($"                 Definicion_Tokens.Add(\"{item}\",\"{SintacticoA.Definicion_Tokens[item]}\");");
+                }
+                writer.WriteLine("          }");
+                writer.WriteLine("          public static void Llenar_ListaErrores()");
+                writer.WriteLine("          {");
+                for (int i = 0; i < SintacticoA.ErrorList.Count; i++)
+                {
+                    writer.WriteLine($"                 Error_List.Add(\"{SintacticoA.ErrorList[i]}\");");
                 }
                 writer.WriteLine("          }");
                 writer.WriteLine("          public static bool BuscarCadena_DiccionarioActions(string tmp)");
@@ -206,13 +229,15 @@ namespace Proyecto_LFA
                 writer.WriteLine("              var temp = cadena.ToCharArray();");
                 writer.WriteLine("              for(int j=0; j < temp.Length; j++)");
                 writer.WriteLine("              {");
+                writer.WriteLine("                  var bandera = false;");
                                                 for (int i = 0; i < SintacticoA.SetsList.Count; i++)
                                                 {
                                                     if (i == 0)
                                                     {
                 writer.WriteLine($"                    if({DevolverLineaIf(SintacticoA.SetsList[i])}) //Definido para el SET {SintacticoA.SetsList[i]}");
                 writer.WriteLine("                     {");
-                writer.WriteLine("                           if(!listaResultante.Contains(\"{SintacticoA.SetsList[i]}\")");
+                writer.WriteLine("                          bandera = true;");
+                writer.WriteLine($"                           if(!listaResultante.Contains(\"{SintacticoA.SetsList[i]}\"))");
                 writer.WriteLine("                          {");
                 writer.WriteLine($"                              listaResultante.Add(\"{SintacticoA.SetsList[i]}\");");
                 writer.WriteLine("                          }");
@@ -222,13 +247,18 @@ namespace Proyecto_LFA
                                                     {
                 writer.WriteLine($"                    else if({DevolverLineaIf(SintacticoA.SetsList[i])}) //Definido para el SET {SintacticoA.SetsList[i]}");
                 writer.WriteLine("                     {");
-                writer.WriteLine("                           if(!listaResultante.Contains(\"{SintacticoA.SetsList[i]}\"))");
+                writer.WriteLine("                          bandera = true;");
+                writer.WriteLine($"                           if(!listaResultante.Contains(\"{SintacticoA.SetsList[i]}\"))");
                 writer.WriteLine("                          {");
                 writer.WriteLine($"                              listaResultante.Add(\"{SintacticoA.SetsList[i]}\");");
                 writer.WriteLine("                          }");
                 writer.WriteLine("                     }");
                                                     }
                                                 }
+                writer.WriteLine($"                 if(bandera == false)");
+                writer.WriteLine("                  {");
+                writer.WriteLine("                     Console.WriteLine($\"El caracter {temp[j]} no tiene definicion\");");
+                writer.WriteLine("                  }");
                 writer.WriteLine("              }");
                 writer.WriteLine("              return listaResultante;");
                 writer.WriteLine("          }");
@@ -248,6 +278,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("                  {");
                 writer.WriteLine("                          var numeroToken = item.Split(' ');");
                 writer.WriteLine("                          Console.WriteLine($\"{cadena} = {numeroToken[1].Trim(' ')}\");");
+                writer.WriteLine("                          break;");
                 writer.WriteLine("                  }");
                 writer.WriteLine("              }");
                 writer.WriteLine("          }");
