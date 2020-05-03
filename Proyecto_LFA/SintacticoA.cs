@@ -11,7 +11,8 @@ namespace Proyecto_LFA
         public static List<string> TokensList = new List<string>();//Lista que contiene tokens ya para la creacion de un arbol
         public static List<string> SetsList = new List<string>();//Lista que contiene los SETS declarados para manejo de operaciones
         public static Dictionary<string, string> DiccionarioActions = new Dictionary<string, string>(); //PARA LA FASE III
-        public static Dictionary<string, string> Definicion_SETS = new Dictionary<string, string>(); 
+        public static Dictionary<string, string> Definicion_SETS = new Dictionary<string, string>();
+        public static Dictionary<string, string> Definicion_Tokens = new Dictionary<string, string>();
         public static string Tokenizar(List<string> seccionTokens, int inicioTokens, int finTokens, ref bool error_Encontrado) 
         {
             var listaAux = new List<string>();
@@ -23,6 +24,7 @@ namespace Proyecto_LFA
                 if (elemento.Contains("'='"))
                 {
                     var tmp = string.Empty;
+                    var tmp2 = string.Empty;//Contiene en el nombre del TOKEN
                     for (int j = 0; j < elemento.Length; j++)
                     {
                         if (elemento[j] == '\'')
@@ -33,8 +35,22 @@ namespace Proyecto_LFA
                                 j++;
                             }
                         }
+                        else
+                        {
+                            tmp2 += elemento[j];
+                        }
                     }
                     elemento = tmp;
+                    var definicion_SinComillas = elemento;
+                    for (int j = 0; j < definicion_SinComillas.Length; j++)
+                    {
+                        if (definicion_SinComillas[j]== '\'')
+                        {
+                            definicion_SinComillas = definicion_SinComillas.Remove(j, 1);
+                            definicion_SinComillas = definicion_SinComillas.Remove(j+1, 1);
+                        }
+                    }
+                    Definicion_Tokens.Add(tmp2.Trim('='), definicion_SinComillas);
                 }
                 else if (!elemento.Contains("'='"))
                 {
@@ -51,6 +67,8 @@ namespace Proyecto_LFA
                     }
                     var linea = elemento.Split('=');
                     elemento = linea[1];
+                    var tmp3 = linea[0];
+                    Definicion_Tokens.Add(tmp3.Trim(' ', '\t'), elemento.Trim(' ', '\t'));
                 }
                 var trim_chars = new char[] { ' ', '\t' };
                 elemento = elemento.Trim(trim_chars);

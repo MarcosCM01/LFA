@@ -31,16 +31,18 @@ namespace Proyecto_LFA
                 writer.WriteLine("          public static string cadena = string.Empty; //variable donde se almacena la cadena ingresada por el usuario");
                 writer.WriteLine("          public static List<int> Estados_Aceptacion = new List<int>();");
                 writer.WriteLine("          public static Dictionary<string, string> Diccionario_actions = new Dictionary<string, string>();");
+                writer.WriteLine("          public static Dictionary<string, string> Definicion_Tokens = new Dictionary<string, string>();");
                 writer.WriteLine("          static void Main(string[] args)");
                 writer.WriteLine("          {");
                 writer.WriteLine("              Console.WriteLine(\"INGRESAR CADENA A EVALUAR MEDIANTE SCANNER\");");
                 writer.WriteLine("              cadena = Console.ReadLine();");
                 writer.WriteLine("              LlenarListaAceptados();");
                 writer.WriteLine("              LlenarDiccionarioActions();");
+                writer.WriteLine("              LlenarDiccionario_DefinicionTokens();");
                 writer.WriteLine("              var resultado_cadena = EvaluarCadena(cadena);");
                 writer.WriteLine("              if(resultado_cadena == true) //Toda la cadena es aceptada");
                 writer.WriteLine("              {");
-                writer.WriteLine("                  Console.WriteLine(\"La cadena fue aceptada \");");
+                writer.WriteLine("                  Console.WriteLine(\"La cadena fue aceptada.\");");
                 writer.WriteLine("                  MostrarComponentesLexicos(cadena.Split(' '));");
                 writer.WriteLine("              }");
                 writer.WriteLine("              else");
@@ -58,62 +60,65 @@ namespace Proyecto_LFA
                 writer.WriteLine("              {");
                 writer.WriteLine("                  var estado_temporal = 0;");
                 writer.WriteLine("                  var temp= vectorPalabras[i];");
-                writer.WriteLine("                  for(int j=0; j < temp.Length; j++) //Para recorrer cada caracter de cada palabra");
+                writer.WriteLine("                  if(temp.Length > 0)");
                 writer.WriteLine("                  {");
-                writer.WriteLine("                      switch(estado_temporal)");
+                writer.WriteLine("                      for(int j=0; j < temp.Length; j++) //Para recorrer cada caracter de cada palabra");
                 writer.WriteLine("                      {");
-                                                          for (int i = 0; i < Form1.diccionario_EstadoTransicion.Count; i++)
-                                                          {
-                                                            var contador_ifs = 0;
-                writer.WriteLine($"                         case {i}:");
-                                                                for (int j = 0; j < Form1.st_SINTACTICO.Count; j++)
+                writer.WriteLine("                          switch(estado_temporal)");
+                writer.WriteLine("                          {");
+                                                                for (int i = 0; i < Form1.diccionario_EstadoTransicion.Count; i++)
                                                                 {
-                                                                    if (VerificarSiSeHace(i, j) == true)
+                                                                    var contador_ifs = 0;
+                writer.WriteLine($"                                 case {i}:");
+                                                                    for (int j = 0; j < Form1.st_SINTACTICO.Count; j++)
                                                                     {
-                                                                        if (SintacticoA.SetsList.Contains(Form1.st_SINTACTICO[j]))
+                                                                        if (VerificarSiSeHace(i, j) == true)
                                                                         {
-                                                                            //CREAR METODO PARA DEFINIR EL RANGO DE VALORES PARA EL CARACTER
-                                                                            if (contador_ifs == 0)
+                                                                            if (SintacticoA.SetsList.Contains(Form1.st_SINTACTICO[j]))
                                                                             {
-               writer.WriteLine($"                                            if({DevolverLineaIf(Form1.st_SINTACTICO[j])}) //Definido para el SET {Form1.st_SINTACTICO[j]}");
-               writer.WriteLine("                                            {");
-               writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
-               writer.WriteLine("                                            }");
-                                                                                contador_ifs++;
+                                                                                //CREAR METODO PARA DEFINIR EL RANGO DE VALORES PARA EL CARACTER
+                                                                                if (contador_ifs == 0)
+                                                                                {
+                writer.WriteLine($"                                            if({DevolverLineaIf(Form1.st_SINTACTICO[j])}) //Definido para el SET {Form1.st_SINTACTICO[j]}");
+                writer.WriteLine("                                            {");
+                writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
+                writer.WriteLine("                                            }");
+                                                                                    contador_ifs++;
+                                                                                }
+                                                                                else
+                                                                                {
+                writer.WriteLine($"                                            else if({DevolverLineaIf(Form1.st_SINTACTICO[j])}) //Definido para el SET {Form1.st_SINTACTICO[j]}");
+                writer.WriteLine("                                            {");
+                writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
+                writer.WriteLine("                                            }");
+                                                                                    contador_ifs++;
+                                                                                }
                                                                             }
                                                                             else
                                                                             {
-               writer.WriteLine($"                                            else if({DevolverLineaIf(Form1.st_SINTACTICO[j])}) //Definido para el SET {Form1.st_SINTACTICO[j]}");
-               writer.WriteLine("                                            {");
-               writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
-               writer.WriteLine("                                            }");
-                                                                                contador_ifs++;
-                                                                            }
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            if (contador_ifs == 0)
-                                                                            {
-               writer.WriteLine($"                                          if (temp[j] == \'{Form1.st_SINTACTICO[j]}\') //Definido para  {Form1.st_SINTACTICO[j]}");
-               writer.WriteLine("                                          {");
-               writer.WriteLine($"                                              estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
-               writer.WriteLine("                                          }");
-                                                                                contador_ifs++;
-                                                                            }
-                                                                            else
-                                                                            {
-               writer.WriteLine($"                                          else if (temp[j] == \'{Form1.st_SINTACTICO[j]}\') //Definido para  {Form1.st_SINTACTICO[j]}");
-               writer.WriteLine("                                          {");
-               writer.WriteLine($"                                              estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
-               writer.WriteLine("                                          }");
-                                                                                contador_ifs++;
+                                                                                if (contador_ifs == 0)
+                                                                                {
+                writer.WriteLine($"                                           if (temp[j] == \'{Form1.st_SINTACTICO[j]}\') //Definido para  {Form1.st_SINTACTICO[j]}");
+                writer.WriteLine("                                           {");
+                writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
+                writer.WriteLine("                                           }");
+                                                                                    contador_ifs++;
+                                                                                }
+                                                                                else
+                                                                                {
+                writer.WriteLine($"                                           else if (temp[j] == \'{Form1.st_SINTACTICO[j]}\') //Definido para  {Form1.st_SINTACTICO[j]}");
+                writer.WriteLine("                                           {");
+                writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
+                writer.WriteLine("                                           }");
+                                                                                    contador_ifs++;
+                                                                                }
                                                                             }
                                                                         }
                                                                     }
+                writer.WriteLine($"                                     break;");
                                                                 }
-                writer.WriteLine($"                             break;");
-                                                          }
                 writer.WriteLine("                      }");
+                writer.WriteLine("                  }");
                 writer.WriteLine("                  }");
                 writer.WriteLine("                  if(ComprobarEstado(estado_temporal) == false) //Comprueba que se encuentre en un estado de aceptacion luego de evaluar la palabra");
                 writer.WriteLine("                  {");
@@ -138,27 +143,37 @@ namespace Proyecto_LFA
                 writer.WriteLine("              }");
                 writer.WriteLine("              return false;");
                 writer.WriteLine("          }");
-                writer.WriteLine("      }");
                 writer.WriteLine("          public static void MostrarComponentesLexicos(string[] palabra)");
                 writer.WriteLine("          {");
                 writer.WriteLine("              for(int i=0; i < palabra.Length; i++)");
                 writer.WriteLine("              {");
                 writer.WriteLine("                 var tmp = palabra[i];");
-                writer.WriteLine("                 if(BuscarCadena_DiccionarioActions(tmp) == false);");
+                writer.WriteLine("                 if(BuscarCadena_DiccionarioActions(tmp) == false)");
                 writer.WriteLine("                 {");
-                writer.WriteLine("                      //BuscarCadena_Tokens();");
+                writer.WriteLine("                      if(IgualarCadena_DefinicionTokens(tmp) == false)//Metodo para ver si es una definicion exacta de un token");
+                writer.WriteLine("                      {");
+                writer.WriteLine("                          var token_ST = DevolverLista_enSETS(tmp);");
+                //PASO FINAL
+                writer.WriteLine("                          ImprimirTokens_ConLista(token_ST, tmp);");
+                writer.WriteLine("                      }");
                 writer.WriteLine("                 }");
                 writer.WriteLine("              }");
-                writer.WriteLine("              return false;");
                 writer.WriteLine("          }");
                 writer.WriteLine("          public static void LlenarDiccionarioActions()");
                 writer.WriteLine("          {");
-                                                foreach (var item in SintacticoA.DiccionarioActions.Keys)
-                                                {
-                writer.WriteLine($"                 Diccionario_actions.Add({item},{SintacticoA.DiccionarioActions[item]});");
-                                                }
+                foreach (var item in SintacticoA.DiccionarioActions.Keys)
+                {
+                    writer.WriteLine($"                 Diccionario_actions.Add(\"{item}\",\"{SintacticoA.DiccionarioActions[item]}\");");
+                }
                 writer.WriteLine("          }");
-                writer.WriteLine("          public static bool BuscarCadena_DiccionarioActions(tmp)");
+                writer.WriteLine("          public static void LlenarDiccionario_DefinicionTokens()");
+                writer.WriteLine("          {");
+                foreach (var item in SintacticoA.Definicion_Tokens.Keys)
+                {
+                    writer.WriteLine($"                 Definicion_Tokens.Add(\"{item}\",\"{SintacticoA.Definicion_Tokens[item]}\");");
+                }
+                writer.WriteLine("          }");
+                writer.WriteLine("          public static bool BuscarCadena_DiccionarioActions(string tmp)");
                 writer.WriteLine("          {");
                 writer.WriteLine("              var bandera = false;");
                 writer.WriteLine("              foreach (var item in Diccionario_actions.Keys)");
@@ -171,6 +186,72 @@ namespace Proyecto_LFA
                 writer.WriteLine("              }");
                 writer.WriteLine("              return bandera;");
                 writer.WriteLine("          }");
+                writer.WriteLine("          public static bool IgualarCadena_DefinicionTokens(string cadena)//Primer filtro para ver si es una definicion exacta");
+                writer.WriteLine("          {");
+                writer.WriteLine("              var bandera = false;");
+                writer.WriteLine("              foreach (var item in Definicion_Tokens.Keys)");
+                writer.WriteLine("              {");
+                writer.WriteLine("                  if(cadena == Definicion_Tokens[item])");
+                writer.WriteLine("                  {");
+                writer.WriteLine("                      var numeroToken = item.Split(' ');");
+                writer.WriteLine("                      Console.WriteLine($\"{cadena} = {numeroToken[1].Trim(' ')}\");");
+                writer.WriteLine("                      bandera = true;");
+                writer.WriteLine("                  }");
+                writer.WriteLine("              }");
+                writer.WriteLine("              return bandera;");
+                writer.WriteLine("          }");
+                writer.WriteLine("          public static List<string> DevolverLista_enSETS(string cadena)//Primer filtro para ver si es una definicion exacta");
+                writer.WriteLine("          {");
+                writer.WriteLine("              var listaResultante = new List<string>();");
+                writer.WriteLine("              var temp = cadena.ToCharArray();");
+                writer.WriteLine("              for(int j=0; j < temp.Length; j++)");
+                writer.WriteLine("              {");
+                                                for (int i = 0; i < SintacticoA.SetsList.Count; i++)
+                                                {
+                                                    if (i == 0)
+                                                    {
+                writer.WriteLine($"                    if({DevolverLineaIf(SintacticoA.SetsList[i])}) //Definido para el SET {SintacticoA.SetsList[i]}");
+                writer.WriteLine("                     {");
+                writer.WriteLine("                           if(!listaResultante.Contains(\"{SintacticoA.SetsList[i]}\")");
+                writer.WriteLine("                          {");
+                writer.WriteLine($"                              listaResultante.Add(\"{SintacticoA.SetsList[i]}\");");
+                writer.WriteLine("                          }");
+                writer.WriteLine("                     }");
+                                                    }
+                                                    else
+                                                    {
+                writer.WriteLine($"                    else if({DevolverLineaIf(SintacticoA.SetsList[i])}) //Definido para el SET {SintacticoA.SetsList[i]}");
+                writer.WriteLine("                     {");
+                writer.WriteLine("                           if(!listaResultante.Contains(\"{SintacticoA.SetsList[i]}\"))");
+                writer.WriteLine("                          {");
+                writer.WriteLine($"                              listaResultante.Add(\"{SintacticoA.SetsList[i]}\");");
+                writer.WriteLine("                          }");
+                writer.WriteLine("                     }");
+                                                    }
+                                                }
+                writer.WriteLine("              }");
+                writer.WriteLine("              return listaResultante;");
+                writer.WriteLine("          }");
+                writer.WriteLine("          public static void ImprimirTokens_ConLista(List<string> SETS, string cadena)");
+                writer.WriteLine("          {");
+                writer.WriteLine("              foreach (var item in Definicion_Tokens.Keys)");
+                writer.WriteLine("              {");
+                writer.WriteLine("              var contador = 0;");
+                writer.WriteLine("                  for(int i=0; i< SETS.Count; i++)");
+                writer.WriteLine("                  {");
+                writer.WriteLine("                      if(Definicion_Tokens[item].Contains(SETS[i]))");
+                writer.WriteLine("                      {");
+                writer.WriteLine("                          contador++;");
+                writer.WriteLine("                      }");
+                writer.WriteLine("                  }");
+                writer.WriteLine("                  if(contador == SETS.Count) //Es ese TOKEN");
+                writer.WriteLine("                  {");
+                writer.WriteLine("                          var numeroToken = item.Split(' ');");
+                writer.WriteLine("                          Console.WriteLine($\"{cadena} = {numeroToken[1].Trim(' ')}\");");
+                writer.WriteLine("                  }");
+                writer.WriteLine("              }");
+                writer.WriteLine("          }");
+
                 writer.WriteLine("      }");
                 writer.WriteLine("}");
                 writer.Close();
