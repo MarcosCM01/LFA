@@ -51,6 +51,7 @@ namespace Proyecto_LFA
                             definicion_SinComillas = definicion_SinComillas.Remove(j+1, 1);
                         }
                     }
+                    
                     Definicion_Tokens.Add(tmp2.Trim('='), definicion_SinComillas);
                 }
                 else if (!elemento.Contains("'='"))
@@ -224,6 +225,34 @@ namespace Proyecto_LFA
             for (int i = inicio; i < fin; i++)
             {
                 ErrorList.Add(gramatica[i]);
+            }
+        }
+        public static void ModificarDiccionarioTokenes()// SE MODIFICA PARA AQUELLAS DEFINICIONES DE TOKEN QUE CONTENGAN LA COMILLA COMO CARACTER
+        {
+            var respuesta = new List<string>();
+            foreach (var item in Definicion_Tokens.Keys)
+            {
+                if (Definicion_Tokens[item].Contains("'\''") || Definicion_Tokens[item].Contains("'\"'"))
+                {
+                    respuesta.Add(item);
+                }
+            }
+            for (int i = 0; i < respuesta.Count; i++)
+            {
+                var item = Definicion_Tokens[respuesta[i]];
+                for (int j = 0; j < item.Length; j++)
+                {
+                     if (j + 2 < item.Length)
+                     {
+                          if (item[j] == '\'' || item[j] == '\"')
+                          {
+                             item = item.Insert(j + 1, "\\");
+                            j += 3;
+                          }
+                     }
+                    
+                }
+                Definicion_Tokens[respuesta[i]] = item;
             }
         }
     }

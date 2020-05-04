@@ -196,8 +196,8 @@ namespace Proyecto_LFA
                 writer.WriteLine("                 {");
                 writer.WriteLine("                      if(IgualarCadena_DefinicionTokens(tmp) == false)//Metodo para ver si es una definicion exacta de un token");
                 writer.WriteLine("                      {");
-                writer.WriteLine("                          var token_ST = DevolverLista_enSETS(tmp);");
-                writer.WriteLine("                          ImprimirTokens_ConLista(token_ST, tmp);");
+                writer.WriteLine("                          var cadenaSETS = DevolverCadena_enFormaSETS(tmp);");
+                writer.WriteLine("                          ImprimirTokens_ConNuevaCadena(cadenaSETS, tmp);");
                 writer.WriteLine("                      }");
                 writer.WriteLine("                 }");
                 writer.WriteLine("              }");
@@ -211,9 +211,10 @@ namespace Proyecto_LFA
                 writer.WriteLine("          }");
                 writer.WriteLine("          public static void LlenarDiccionario_DefinicionTokens()");
                 writer.WriteLine("          {");
+                SintacticoA.ModificarDiccionarioTokenes();
                 foreach (var item in SintacticoA.Definicion_Tokens.Keys)
                 {
-                    writer.WriteLine($"                 Definicion_Tokens.Add(\"{item}\",\"{SintacticoA.Definicion_Tokens[item]}\");");
+                writer.WriteLine($"                 Definicion_Tokens.Add(\"{item}\",\"{SintacticoA.Definicion_Tokens[item]}\");");
                 }
                 writer.WriteLine("          }");
                 writer.WriteLine("          public static void Llenar_ListaErrores()");
@@ -250,23 +251,21 @@ namespace Proyecto_LFA
                 writer.WriteLine("              }");
                 writer.WriteLine("              return bandera;");
                 writer.WriteLine("          }");
-                writer.WriteLine("          public static List<string> DevolverLista_enSETS(string cadena)//Primer filtro para ver si es una definicion exacta");
+                writer.WriteLine("          public static string DevolverCadena_enFormaSETS(string cadena)");
                 writer.WriteLine("          {");
-                writer.WriteLine("              var listaResultante = new List<string>();");
+                writer.WriteLine("              var cadenaSETS = string.Empty;");
                 writer.WriteLine("              var temp = cadena.ToCharArray();");
                 writer.WriteLine("              for(int j=0; j < temp.Length; j++)");
                 writer.WriteLine("              {");
-                writer.WriteLine("                  var bandera = false;");
                                                 for (int i = 0; i < SintacticoA.SetsList.Count; i++)
                                                 {
                                                     if (i == 0)
                                                     {
                 writer.WriteLine($"                    if({DevolverLineaIf(SintacticoA.SetsList[i])}) //Definido para el SET {SintacticoA.SetsList[i]}");
                 writer.WriteLine("                     {");
-                writer.WriteLine("                          bandera = true;");
-                writer.WriteLine($"                           if(!listaResultante.Contains(\"{SintacticoA.SetsList[i]}\"))");
+                writer.WriteLine($"                           if(!cadenaSETS.Contains(\"{SintacticoA.SetsList[i]}\"))");
                 writer.WriteLine("                          {");
-                writer.WriteLine($"                              listaResultante.Add(\"{SintacticoA.SetsList[i]}\");");
+                writer.WriteLine($"                              cadenaSETS += (\"{SintacticoA.SetsList[i]}\");");
                 writer.WriteLine("                          }");
                 writer.WriteLine("                     }");
                                                     }
@@ -274,34 +273,33 @@ namespace Proyecto_LFA
                                                     {
                 writer.WriteLine($"                    else if({DevolverLineaIf(SintacticoA.SetsList[i])}) //Definido para el SET {SintacticoA.SetsList[i]}");
                 writer.WriteLine("                     {");
-                writer.WriteLine("                          bandera = true;");
-                writer.WriteLine($"                           if(!listaResultante.Contains(\"{SintacticoA.SetsList[i]}\"))");
+                writer.WriteLine($"                           if(!cadenaSETS.Contains(\"{SintacticoA.SetsList[i]}\"))");
                 writer.WriteLine("                          {");
-                writer.WriteLine($"                              listaResultante.Add(\"{SintacticoA.SetsList[i]}\");");
+                writer.WriteLine($"                              cadenaSETS+= (\"{SintacticoA.SetsList[i]}\");");
                 writer.WriteLine("                          }");
                 writer.WriteLine("                     }");
                                                     }
                                                 }
-                writer.WriteLine($"                 if(bandera == false)");
-                writer.WriteLine("                  {");
-                writer.WriteLine("                     Console.WriteLine($\"El caracter {temp[j]} no tiene definicion\");");
-                writer.WriteLine("                  }");
+                writer.WriteLine($"                   else");
+                writer.WriteLine("                   {");
+                writer.WriteLine("                     cadenaSETS+= temp[j];");
+                writer.WriteLine("                   }");
                 writer.WriteLine("              }");
-                writer.WriteLine("              return listaResultante;");
+                writer.WriteLine("              return cadenaSETS;");
                 writer.WriteLine("          }");
-                writer.WriteLine("          public static void ImprimirTokens_ConLista(List<string> SETS, string cadena)");
+                writer.WriteLine("          public static void ImprimirTokens_ConNuevaCadena(string SETS, string cadena)");
                 writer.WriteLine("          {");
                 writer.WriteLine("              foreach (var item in Definicion_Tokens.Keys)");
                 writer.WriteLine("              {");
                 writer.WriteLine("              var contador = 0;");
-                writer.WriteLine("                  for(int i=0; i< SETS.Count; i++)");
+                writer.WriteLine("                  for(int i=0; i< SETS.Length; i++)");
                 writer.WriteLine("                  {");
                 writer.WriteLine("                      if(Definicion_Tokens[item].Contains(SETS[i]))");
                 writer.WriteLine("                      {");
                 writer.WriteLine("                          contador++;");
                 writer.WriteLine("                      }");
                 writer.WriteLine("                  }");
-                writer.WriteLine("                  if(contador == SETS.Count) //Es ese TOKEN");
+                writer.WriteLine("                  if(contador == SETS.Length) //Es ese TOKEN");
                 writer.WriteLine("                  {");
                 writer.WriteLine("                          var numeroToken = item.Split(' ');");
                 writer.WriteLine("                          Console.WriteLine($\"{cadena} = {numeroToken[1].Trim(' ')}\");");
