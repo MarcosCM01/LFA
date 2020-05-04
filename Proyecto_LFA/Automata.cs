@@ -44,7 +44,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("                  LlenarDiccionario_DefinicionTokens();");
                 writer.WriteLine("                  Llenar_ListaErrores();");
                 writer.WriteLine("                  var resultado_cadena = EvaluarCadena(cadena);");
-                writer.WriteLine("                  if(resultado_cadena == true) //Toda la cadena es aceptada");
+                writer.WriteLine("                  if(resultado_cadena == true) //Toda la cadena es aceptada(EN TEORIA)");
                 writer.WriteLine("                  {");
                 writer.WriteLine("                      Console.WriteLine(\"La cadena fue aceptada.\");");
                 writer.WriteLine("                      MostrarComponentesLexicos(cadena.Split(' '));");
@@ -66,6 +66,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("          {");
                 writer.WriteLine("              var resultado_cadena = true;");
                 writer.WriteLine("              var vectorPalabras = cadena.Split(' ');");
+                writer.WriteLine("              var error_encontrado = 0;");
                 writer.WriteLine("              for(int i=0; i< vectorPalabras.Length; i++)");
                 writer.WriteLine("              {");
                 writer.WriteLine("                  var estado_temporal = 0;");
@@ -74,6 +75,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("                  {");
                 writer.WriteLine("                      for(int j=0; j < temp.Length; j++) //Para recorrer cada caracter de cada palabra");
                 writer.WriteLine("                      {");
+                writer.WriteLine("                          var existe = false;");
                 writer.WriteLine("                          switch(estado_temporal)");
                 writer.WriteLine("                          {");
                                                                 for (int i = 0; i < Form1.diccionario_EstadoTransicion.Count; i++)
@@ -92,6 +94,7 @@ namespace Proyecto_LFA
                 writer.WriteLine($"                                            if({DevolverLineaIf(Form1.st_SINTACTICO[j])}) //Definido para el SET {Form1.st_SINTACTICO[j]}");
                 writer.WriteLine("                                            {");
                 writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
+                writer.WriteLine("                                                existe = true;");
                 writer.WriteLine("                                            }");
                                                                                     contador_ifs++;
                                                                                 }
@@ -100,6 +103,7 @@ namespace Proyecto_LFA
                 writer.WriteLine($"                                            else if({DevolverLineaIf(Form1.st_SINTACTICO[j])}) //Definido para el SET {Form1.st_SINTACTICO[j]}");
                 writer.WriteLine("                                            {");
                 writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
+                writer.WriteLine("                                                existe = true;");
                 writer.WriteLine("                                            }");
                                                                                     contador_ifs++;
                                                                                 }
@@ -108,29 +112,59 @@ namespace Proyecto_LFA
                                                                             {
                                                                                 if (contador_ifs == 0)
                                                                                 {
+                                                                                    if (Form1.st_SINTACTICO[j] == "\'")
+                                                                                    {
+                writer.WriteLine($"                                           if (temp[j] == \'\\{Form1.st_SINTACTICO[j]}\') //Definido para  {Form1.st_SINTACTICO[j]}");
+                writer.WriteLine("                                           {");
+                writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
+                writer.WriteLine("                                                existe = true;");
+                writer.WriteLine("                                           }");
+                                                                                    }
+                                                                                    else
+                                                                                    {
                 writer.WriteLine($"                                           if (temp[j] == \'{Form1.st_SINTACTICO[j]}\') //Definido para  {Form1.st_SINTACTICO[j]}");
                 writer.WriteLine("                                           {");
                 writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
+                writer.WriteLine("                                                existe = true;");
                 writer.WriteLine("                                           }");
+                                                                                    }   
                                                                                     contador_ifs++;
                                                                                 }
                                                                                 else
                                                                                 {
-                writer.WriteLine($"                                           else if (temp[j] == \'{Form1.st_SINTACTICO[j]}\') //Definido para  {Form1.st_SINTACTICO[j]}");
+
+                                                                                    if (Form1.st_SINTACTICO[j] == "\'")
+                                                                                    {
+                writer.WriteLine($"                                           else if (temp[j] == \'\\{Form1.st_SINTACTICO[j]}\') //Definido para  {Form1.st_SINTACTICO[j]}");
                 writer.WriteLine("                                           {");
                 writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
+                writer.WriteLine("                                                existe = true;");
                 writer.WriteLine("                                           }");
-                                                                                    contador_ifs++;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                writer.WriteLine($"                                          else if (temp[j] == \'{Form1.st_SINTACTICO[j]}\') //Definido para  {Form1.st_SINTACTICO[j]}");
+                writer.WriteLine("                                           {");
+                writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
+                writer.WriteLine("                                                existe = true;");
+                writer.WriteLine("                                           }");
+                                                                                    }
+                                                                                contador_ifs++;
                                                                                 }
                                                                             }
                                                                         }
                                                                     }
                 writer.WriteLine($"                                     break;");
                                                                 }
+                writer.WriteLine("                          }");
+                writer.WriteLine("                          if(existe == false) //NO EXISTE LA PALABRA EN LA GRAMATICA");
+                writer.WriteLine("                         {");
+                writer.WriteLine("                              Console.WriteLine($\"El caracter {temp[j]} no se encuentra definido \");");
+                writer.WriteLine("                              error_encontrado++;");
+                writer.WriteLine("                         }");
                 writer.WriteLine("                      }");
                 writer.WriteLine("                  }");
-                writer.WriteLine("                  }");
-                writer.WriteLine("                  if(ComprobarEstado(estado_temporal) == false) //Comprueba que se encuentre en un estado de aceptacion luego de evaluar la palabra");
+                writer.WriteLine("                  if(ComprobarEstado(estado_temporal) == false || error_encontrado != 0) //Comprueba que se encuentre en un estado de aceptacion luego de evaluar la palabra");
                 writer.WriteLine("                  {");
                 writer.WriteLine("                      resultado_cadena = false;");
                 writer.WriteLine("                      break;");
@@ -163,14 +197,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("                      if(IgualarCadena_DefinicionTokens(tmp) == false)//Metodo para ver si es una definicion exacta de un token");
                 writer.WriteLine("                      {");
                 writer.WriteLine("                          var token_ST = DevolverLista_enSETS(tmp);");
-                writer.WriteLine("                          if(token_ST.Count == 0)//El estado inicial es de aceptacion, pero no encontrara su TOKEN");
-                writer.WriteLine("                          {");
-                writer.WriteLine("                              Console.WriteLine($\"Debido a la gramatica, el estado inicial es de aceptacion, pero la cadena {tmp} no existe definicion\");");
-                writer.WriteLine("                          }");
-                writer.WriteLine("                          else");
-                writer.WriteLine("                          {");
-                writer.WriteLine("                              ImprimirTokens_ConLista(token_ST, tmp);");
-                writer.WriteLine("                          }");
+                writer.WriteLine("                          ImprimirTokens_ConLista(token_ST, tmp);");
                 writer.WriteLine("                      }");
                 writer.WriteLine("                 }");
                 writer.WriteLine("              }");
@@ -293,36 +320,68 @@ namespace Proyecto_LFA
             var respuesta = SintacticoA.Definicion_SETS[keySet];
             var condicion = string.Empty;
             var bandera_comilla = false;
-            for (int i = 0; i < respuesta.Length; i++)
+            if (keySet == "CHARSET")
             {
-                if (respuesta[i]== '\'' && bandera_comilla == false)
+                var valor_inicial = string.Empty;
+                var valor_final = string.Empty;
+                for (int i = 0; i < respuesta.Length; i++)
                 {
-                    if (i+3 < respuesta.Length)
+                    if (respuesta[i] == '(')
                     {
-                        condicion += $"(temp[j] >= {Convert.ToByte(respuesta[i + 1])} ";
-                        i += 2;
-                        bandera_comilla = true;
+                        i++;
+                        if (valor_inicial.Length == 0)
+                        {
+                            while (respuesta[i] != ')')
+                            {
+                                valor_inicial += respuesta[i];
+                                i++;
+                            }
+                        }
+                        else
+                        {
+                            while (respuesta[i] != ')')
+                            {
+                                valor_final += respuesta[i];
+                                i++;
+                            }
+                        }
                     }
-                    else
+                }
+                condicion = $"(temp[j] >= {valor_inicial} && temp[j] <= {valor_final})";
+            }
+            else
+            {
+                for (int i = 0; i < respuesta.Length; i++)
+                {
+                    if (respuesta[i] == '\'' && bandera_comilla == false)
                     {
-                        condicion += $"(temp[j] == {Convert.ToByte(respuesta[i + 1])})";
-                        i += 2;
+                        if (i + 3 < respuesta.Length)
+                        {
+                            condicion += $"(temp[j] >= {Convert.ToByte(respuesta[i + 1])} ";
+                            i += 2;
+                            bandera_comilla = true;
+                        }
+                        else
+                        {
+                            condicion += $"(temp[j] == {Convert.ToByte(respuesta[i + 1])})";
+                            i += 2;
+                        }
                     }
-                }
-                else if (respuesta[i] == '\'' && bandera_comilla == true)
-                {
-                    condicion += $"temp[j]<= {Convert.ToByte(respuesta[i + 1])})";
-                    i += 2;
-                    bandera_comilla = false;
-                }
-                else if (respuesta[i]== '.')
-                {
-                    condicion += " && ";
-                    i++;
-                }
-                else if (respuesta[i] == '+')
-                {
-                    condicion += " || ";
+                    else if (respuesta[i] == '\'' && bandera_comilla == true)
+                    {
+                        condicion += $"temp[j]<= {Convert.ToByte(respuesta[i + 1])})";
+                        i += 2;
+                        bandera_comilla = false;
+                    }
+                    else if (respuesta[i] == '.')
+                    {
+                        condicion += " && ";
+                        i++;
+                    }
+                    else if (respuesta[i] == '+')
+                    {
+                        condicion += " || ";
+                    }
                 }
             }
             return condicion;
