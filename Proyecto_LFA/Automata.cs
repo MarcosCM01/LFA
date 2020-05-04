@@ -31,6 +31,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("          public static string cadena = string.Empty; //variable donde se almacena la cadena ingresada por el usuario");
                 writer.WriteLine("          public static List<int> Estados_Aceptacion = new List<int>();");
                 writer.WriteLine("          public static List<string> Error_List = new List<string>();");
+                writer.WriteLine("          public static List<string> Lexema = new List<string>();");
                 writer.WriteLine("          public static Dictionary<string, string> Diccionario_actions = new Dictionary<string, string>();");
                 writer.WriteLine("          public static Dictionary<string, string> Definicion_Tokens = new Dictionary<string, string>();");
                 writer.WriteLine("          static void Main(string[] args)");
@@ -43,6 +44,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("                  LlenarDiccionarioActions();");
                 writer.WriteLine("                  LlenarDiccionario_DefinicionTokens();");
                 writer.WriteLine("                  Llenar_ListaErrores();");
+                //writer.WriteLine("                  Llenar_ListaST();");
                 writer.WriteLine("                  var resultado_cadena = EvaluarCadena(cadena);");
                 writer.WriteLine("                  if(resultado_cadena == true) //Toda la cadena es aceptada(EN TEORIA)");
                 writer.WriteLine("                  {");
@@ -71,6 +73,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("              {");
                 writer.WriteLine("                  var estado_temporal = 0;");
                 writer.WriteLine("                  var temp= vectorPalabras[i];");
+                writer.WriteLine("                  var lexema= string.Empty;");
                 writer.WriteLine("                  if(temp.Length > 0)");
                 writer.WriteLine("                  {");
                 writer.WriteLine("                      for(int j=0; j < temp.Length; j++) //Para recorrer cada caracter de cada palabra");
@@ -95,6 +98,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("                                            {");
                 writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
                 writer.WriteLine("                                                existe = true;");
+                writer.WriteLine($"                                               lexema += \"{Form1.st_SINTACTICO[j]} \";");
                 writer.WriteLine("                                            }");
                                                                                     contador_ifs++;
                                                                                 }
@@ -104,6 +108,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("                                            {");
                 writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
                 writer.WriteLine("                                                existe = true;");
+                writer.WriteLine($"                                               lexema += \"{Form1.st_SINTACTICO[j]} \";");
                 writer.WriteLine("                                            }");
                                                                                     contador_ifs++;
                                                                                 }
@@ -118,6 +123,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("                                           {");
                 writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
                 writer.WriteLine("                                                existe = true;");
+                writer.WriteLine($"                                               lexema += \"\\{Form1.st_SINTACTICO[j]} \";");
                 writer.WriteLine("                                           }");
                                                                                     }
                                                                                     else
@@ -126,19 +132,28 @@ namespace Proyecto_LFA
                 writer.WriteLine("                                           {");
                 writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
                 writer.WriteLine("                                                existe = true;");
+                                                                                        if (Form1.st_SINTACTICO[j] == "\"")
+                                                                                        {
+                writer.WriteLine($"                                               lexema += \"\\{Form1.st_SINTACTICO[j]} \";");
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                writer.WriteLine($"                                               lexema += \"{Form1.st_SINTACTICO[j]} \";");
+                                                                                        }
+                                        
                 writer.WriteLine("                                           }");
                                                                                     }   
                                                                                     contador_ifs++;
                                                                                 }
                                                                                 else
                                                                                 {
-
                                                                                     if (Form1.st_SINTACTICO[j] == "\'")
                                                                                     {
                 writer.WriteLine($"                                           else if (temp[j] == \'\\{Form1.st_SINTACTICO[j]}\') //Definido para  {Form1.st_SINTACTICO[j]}");
                 writer.WriteLine("                                           {");
                 writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
                 writer.WriteLine("                                                existe = true;");
+                writer.WriteLine($"                                               lexema += \"\\{Form1.st_SINTACTICO[j]} \";");
                 writer.WriteLine("                                           }");
                                                                                     }
                                                                                     else
@@ -147,6 +162,14 @@ namespace Proyecto_LFA
                 writer.WriteLine("                                           {");
                 writer.WriteLine($"                                               estado_temporal = {DefinirEstado(i, Form1.st_SINTACTICO[j], j)};");
                 writer.WriteLine("                                                existe = true;");
+                                                                                    if (Form1.st_SINTACTICO[j] == "\"")
+                                                                                    {
+                writer.WriteLine($"                                               lexema += \"\\{Form1.st_SINTACTICO[j]} \";");
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                writer.WriteLine($"                                               lexema += \"{Form1.st_SINTACTICO[j]} \";");
+                                                                                    }
                 writer.WriteLine("                                           }");
                                                                                     }
                                                                                 contador_ifs++;
@@ -163,6 +186,7 @@ namespace Proyecto_LFA
                 writer.WriteLine("                              error_encontrado++;");
                 writer.WriteLine("                         }");
                 writer.WriteLine("                      }");
+                writer.WriteLine("                       Lexema.Add(lexema);");
                 writer.WriteLine("                  }");
                 writer.WriteLine("                  if(ComprobarEstado(estado_temporal) == false || error_encontrado != 0) //Comprueba que se encuentre en un estado de aceptacion luego de evaluar la palabra");
                 writer.WriteLine("                  {");
@@ -196,8 +220,8 @@ namespace Proyecto_LFA
                 writer.WriteLine("                 {");
                 writer.WriteLine("                      if(IgualarCadena_DefinicionTokens(tmp) == false)//Metodo para ver si es una definicion exacta de un token");
                 writer.WriteLine("                      {");
-                writer.WriteLine("                          var cadenaSETS = DevolverCadena_enFormaSETS(tmp);");
-                writer.WriteLine("                          ImprimirTokens_ConNuevaCadena(cadenaSETS, tmp);");
+                //writer.WriteLine("                          var cadenaSETS = DevolverCadena_enFormaSETS(tmp);");
+                writer.WriteLine("                          ImprimirTokens_ConNuevaCadena(Lexema[i], tmp);");
                 writer.WriteLine("                      }");
                 writer.WriteLine("                 }");
                 writer.WriteLine("              }");
@@ -223,6 +247,12 @@ namespace Proyecto_LFA
                 {
                     writer.WriteLine($"                 Error_List.Add(\"{SintacticoA.ErrorList[i]}\");");
                 }
+                //writer.WriteLine("          public static void Llenar_ListaST()");
+                //writer.WriteLine("          {");
+                //for (int i = 0; i < Form1.st_SINTACTICO.Count; i++)
+                //{
+                //    writer.WriteLine($"                 Simbolos_T.Add(\"{Form1.st_SINTACTICO[i]}\");");
+                //}
                 writer.WriteLine("          }");
                 writer.WriteLine("          public static bool BuscarCadena_DiccionarioActions(string tmp)");
                 writer.WriteLine("          {");
@@ -251,55 +281,56 @@ namespace Proyecto_LFA
                 writer.WriteLine("              }");
                 writer.WriteLine("              return bandera;");
                 writer.WriteLine("          }");
-                writer.WriteLine("          public static string DevolverCadena_enFormaSETS(string cadena)");
+                //writer.WriteLine("          public static string DevolverCadena_enFormaSETS(string cadena)");
+                //writer.WriteLine("          {");
+                //writer.WriteLine("              var cadenaSETS = string.Empty;");
+                //writer.WriteLine("              var temp = cadena.ToCharArray();");
+                //writer.WriteLine("              for(int j=0; j < temp.Length; j++)");
+                //writer.WriteLine("              {");
+                //                                for (int i = 0; i < SintacticoA.SetsList.Count; i++)
+                //                                {
+                //                                    if (i == 0)
+                //                                    {
+                //writer.WriteLine($"                    if({DevolverLineaIf(SintacticoA.SetsList[i])}) //Definido para el SET {SintacticoA.SetsList[i]}");
+                //writer.WriteLine("                     {");
+                //writer.WriteLine($"                           if(!cadenaSETS.Contains(\"{SintacticoA.SetsList[i]}\"))");
+                //writer.WriteLine("                          {");
+                //writer.WriteLine($"                              cadenaSETS += (\"{SintacticoA.SetsList[i]}\" );");
+                //writer.WriteLine("                          }");
+                //writer.WriteLine("                     }");
+                //                                    }
+                //                                    else
+                //                                    {
+                //writer.WriteLine($"                    else if({DevolverLineaIf(SintacticoA.SetsList[i])}) //Definido para el SET {SintacticoA.SetsList[i]}");
+                //writer.WriteLine("                     {");
+                //writer.WriteLine($"                           if(!cadenaSETS.Contains(\"{SintacticoA.SetsList[i]}\"))");
+                //writer.WriteLine("                          {");
+                //writer.WriteLine($"                              cadenaSETS+= (\"{SintacticoA.SetsList[i]}\" );");
+                //writer.WriteLine("                          }");
+                //writer.WriteLine("                     }");
+                //                                    }
+                //                                }
+                //writer.WriteLine($"                   else");
+                //writer.WriteLine("                   {");
+                //writer.WriteLine("                     cadenaSETS+= temp[j];");
+                //writer.WriteLine("                   }");
+                //writer.WriteLine("              }");
+                //writer.WriteLine("              return cadenaSETS;");
+                //writer.WriteLine("          }");
+                writer.WriteLine("          public static void ImprimirTokens_ConNuevaCadena(string cadena_Seteada, string cadena)");
                 writer.WriteLine("          {");
-                writer.WriteLine("              var cadenaSETS = string.Empty;");
-                writer.WriteLine("              var temp = cadena.ToCharArray();");
-                writer.WriteLine("              for(int j=0; j < temp.Length; j++)");
-                writer.WriteLine("              {");
-                                                for (int i = 0; i < SintacticoA.SetsList.Count; i++)
-                                                {
-                                                    if (i == 0)
-                                                    {
-                writer.WriteLine($"                    if({DevolverLineaIf(SintacticoA.SetsList[i])}) //Definido para el SET {SintacticoA.SetsList[i]}");
-                writer.WriteLine("                     {");
-                writer.WriteLine($"                           if(!cadenaSETS.Contains(\"{SintacticoA.SetsList[i]}\"))");
-                writer.WriteLine("                          {");
-                writer.WriteLine($"                              cadenaSETS += (\"{SintacticoA.SetsList[i]}\");");
-                writer.WriteLine("                          }");
-                writer.WriteLine("                     }");
-                                                    }
-                                                    else
-                                                    {
-                writer.WriteLine($"                    else if({DevolverLineaIf(SintacticoA.SetsList[i])}) //Definido para el SET {SintacticoA.SetsList[i]}");
-                writer.WriteLine("                     {");
-                writer.WriteLine($"                           if(!cadenaSETS.Contains(\"{SintacticoA.SetsList[i]}\"))");
-                writer.WriteLine("                          {");
-                writer.WriteLine($"                              cadenaSETS+= (\"{SintacticoA.SetsList[i]}\");");
-                writer.WriteLine("                          }");
-                writer.WriteLine("                     }");
-                                                    }
-                                                }
-                writer.WriteLine($"                   else");
-                writer.WriteLine("                   {");
-                writer.WriteLine("                     cadenaSETS+= temp[j];");
-                writer.WriteLine("                   }");
-                writer.WriteLine("              }");
-                writer.WriteLine("              return cadenaSETS;");
-                writer.WriteLine("          }");
-                writer.WriteLine("          public static void ImprimirTokens_ConNuevaCadena(string SETS, string cadena)");
-                writer.WriteLine("          {");
+                writer.WriteLine("              var cadena_array = cadena_Seteada.Split(' ');");
                 writer.WriteLine("              foreach (var item in Definicion_Tokens.Keys)");
                 writer.WriteLine("              {");
                 writer.WriteLine("              var contador = 0;");
-                writer.WriteLine("                  for(int i=0; i< SETS.Length; i++)");
+                writer.WriteLine("                  for(int i=0; i< cadena_array.Length; i++)");
                 writer.WriteLine("                  {");
-                writer.WriteLine("                      if(Definicion_Tokens[item].Contains(SETS[i]))");
+                writer.WriteLine("                      if(Definicion_Tokens[item].Contains(cadena_array[i]))");
                 writer.WriteLine("                      {");
                 writer.WriteLine("                          contador++;");
                 writer.WriteLine("                      }");
                 writer.WriteLine("                  }");
-                writer.WriteLine("                  if(contador == SETS.Length) //Es ese TOKEN");
+                writer.WriteLine("                  if(contador == cadena_array.Length) //Es ese TOKEN");
                 writer.WriteLine("                  {");
                 writer.WriteLine("                          var numeroToken = item.Split(' ');");
                 writer.WriteLine("                          Console.WriteLine($\"{cadena} = {numeroToken[1].Trim(' ')}\");");
