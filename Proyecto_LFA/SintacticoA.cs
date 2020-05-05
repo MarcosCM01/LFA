@@ -229,6 +229,48 @@ namespace Proyecto_LFA
         }
         public static void ModificarDiccionarioTokenes()// SE MODIFICA PARA AQUELLAS DEFINICIONES DE TOKEN QUE CONTENGAN LA COMILLA COMO CARACTER
         {
+            //var listaAux = new List<string>();
+            //foreach (var item in Definicion_Tokens.Keys)
+            //{
+            //    var bandera = false;
+            //    for (int i = 0; i < SetsList.Count; i++)
+            //    {
+            //        if (Definicion_Tokens[item].Contains(SetsList[i]))
+            //        {
+            //            bandera = true;
+            //        }
+            //    }
+            //    if (bandera!= true)
+            //    {
+            //        for (int i = 0; i < Definicion_Tokens[item].Length; i++)
+            //        {
+            //            if (i + 1 < Definicion_Tokens[item].Length)
+            //            {
+            //                if (Definicion_Tokens[item][i] == '\'' && Definicion_Tokens[item][i + 1] != '\'' && Definicion_Tokens[item][i + 1] != '\"')
+            //                {
+            //                    listaAux.Add(item);
+            //                    break;
+            //                }
+            //            }
+            //        }
+            //    }
+                
+            //}
+            //for (int i = 0; i < listaAux.Count; i++)
+            //{
+            //    for (int j = 0; j < Definicion_Tokens[listaAux[i]].Length; j++)
+            //    {
+            //        if (j + 1 < Definicion_Tokens[listaAux[i]].Length)
+            //        {
+            //            if (Definicion_Tokens[listaAux[i]][j] == '\'' && (Definicion_Tokens[listaAux[i]][j + 1] != '\'' || Definicion_Tokens[listaAux[i]][j + 1] != '\"'))
+            //            {
+            //                Definicion_Tokens[listaAux[i]] = Definicion_Tokens[listaAux[i]].Remove(j, 1);
+            //                Definicion_Tokens[listaAux[i]] = Definicion_Tokens[listaAux[i]].Remove(j + 1, 1);
+            //            }
+
+            //        }
+            //    }
+            //}
             var respuesta = new List<string>();
             foreach (var item in Definicion_Tokens.Keys)
             {
@@ -244,7 +286,7 @@ namespace Proyecto_LFA
                 {
                      if (j + 2 < item.Length)
                      {
-                          if (item[j] == '\'' || item[j] == '\"')
+                          if ((item[j] == '\'' || item[j] == '\"'))
                           {
                              item = item.Insert(j + 1, "\\");
                             j += 3;
@@ -254,6 +296,7 @@ namespace Proyecto_LFA
                 }
                 Definicion_Tokens[respuesta[i]] = item;
             }
+            
         }
     }
 }

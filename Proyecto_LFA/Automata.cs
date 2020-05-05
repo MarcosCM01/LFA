@@ -44,7 +44,6 @@ namespace Proyecto_LFA
                 writer.WriteLine("                  LlenarDiccionarioActions();");
                 writer.WriteLine("                  LlenarDiccionario_DefinicionTokens();");
                 writer.WriteLine("                  Llenar_ListaErrores();");
-                //writer.WriteLine("                  Llenar_ListaST();");
                 writer.WriteLine("                  var resultado_cadena = EvaluarCadena(cadena);");
                 writer.WriteLine("                  if(resultado_cadena == true) //Toda la cadena es aceptada(EN TEORIA)");
                 writer.WriteLine("                  {");
@@ -181,10 +180,10 @@ namespace Proyecto_LFA
                                                                 }
                 writer.WriteLine("                          }");
                 writer.WriteLine("                          if(existe == false) //NO EXISTE LA PALABRA EN LA GRAMATICA");
-                writer.WriteLine("                         {");
+                writer.WriteLine("                          {");
                 writer.WriteLine("                              Console.WriteLine($\"El caracter {temp[j]} no se encuentra definido \");");
                 writer.WriteLine("                              error_encontrado++;");
-                writer.WriteLine("                         }");
+                writer.WriteLine("                          }");
                 writer.WriteLine("                      }");
                 writer.WriteLine("                       Lexema.Add(lexema);");
                 writer.WriteLine("                  }");
@@ -196,13 +195,8 @@ namespace Proyecto_LFA
                 writer.WriteLine("              }");
                 writer.WriteLine("              return resultado_cadena;");
                 writer.WriteLine("          }");
-                writer.WriteLine("          public static void LlenarListaAceptados()");
-                writer.WriteLine("          {");
-                                                for (int i = 0; i < Estados_Aceptacion.Count; i++)
-                                                {
-                writer.WriteLine($"                 Estados_Aceptacion.Add({Estados_Aceptacion[i]});");
-                                                }
-                writer.WriteLine("          }");
+
+                //METODOS AUX
                 writer.WriteLine("          public static bool ComprobarEstado(int estado)");
                 writer.WriteLine("          {");
                 writer.WriteLine("              if(Estados_Aceptacion.Contains(estado))");
@@ -218,14 +212,54 @@ namespace Proyecto_LFA
                 writer.WriteLine("                 var tmp = palabra[i];");
                 writer.WriteLine("                 if(BuscarCadena_DiccionarioActions(tmp) == false)");
                 writer.WriteLine("                 {");
-                writer.WriteLine("                      if(IgualarCadena_DefinicionTokens(tmp) == false)//Metodo para ver si es una definicion exacta de un token");
-                writer.WriteLine("                      {");
-                //writer.WriteLine("                          var cadenaSETS = DevolverCadena_enFormaSETS(tmp);");
-                writer.WriteLine("                          ImprimirTokens_ConNuevaCadena(Lexema[i], tmp);");
-                writer.WriteLine("                      }");
+                writer.WriteLine("                      ImprimirTokens_ConNuevaCadena(Lexema[i], tmp);");
                 writer.WriteLine("                 }");
                 writer.WriteLine("              }");
                 writer.WriteLine("          }");
+                writer.WriteLine("          public static bool BuscarCadena_DiccionarioActions(string tmp)");
+                writer.WriteLine("          {");
+                writer.WriteLine("              var bandera = false;");
+                writer.WriteLine("              foreach (var item in Diccionario_actions.Keys)");
+                writer.WriteLine("              {");
+                writer.WriteLine("                  if(tmp == Diccionario_actions[item])");
+                writer.WriteLine("                  {");
+                writer.WriteLine("                      Console.WriteLine($\"{tmp} = {item}\");");
+                writer.WriteLine("                      bandera = true;");
+                writer.WriteLine("                  }");
+                writer.WriteLine("              }");
+                writer.WriteLine("              return bandera;");
+                writer.WriteLine("          }");
+                writer.WriteLine("          public static void ImprimirTokens_ConNuevaCadena(string cadena_Seteada, string cadena)");
+                writer.WriteLine("          {");
+                writer.WriteLine("              cadena_Seteada = cadena_Seteada.Remove(cadena_Seteada.Length-1, 1);");
+                writer.WriteLine("              var cadena_array = cadena_Seteada.Split(' ');");
+                writer.WriteLine("              foreach (var item in Definicion_Tokens.Keys)");
+                writer.WriteLine("              {");
+                writer.WriteLine("                  var contador = 0;");
+                writer.WriteLine("                  for(int i=0; i< cadena_array.Length; i++)");
+                writer.WriteLine("                  {");
+                writer.WriteLine("                      if(Definicion_Tokens[item].Contains(cadena_array[i]))");
+                writer.WriteLine("                      {");
+                writer.WriteLine("                          contador++;");
+                writer.WriteLine("                      }");
+                writer.WriteLine("                  }");
+                writer.WriteLine("                  if(contador == cadena_array.Length) //Es ese TOKEN");
+                writer.WriteLine("                  {");
+                writer.WriteLine("                          var numeroToken = item.Split(' ');");
+                writer.WriteLine("                          Console.WriteLine($\"{cadena} = {numeroToken[numeroToken.Length -1].Trim(' ')}\");");
+                writer.WriteLine("                          break;");
+                writer.WriteLine("                  }");
+                writer.WriteLine("              }");
+                writer.WriteLine("          }");
+                //LLENAR INFORMACION
+                writer.WriteLine("          public static void LlenarListaAceptados()");
+                writer.WriteLine("          {");
+                                                for (int i = 0; i < Estados_Aceptacion.Count; i++)
+                                                {
+                writer.WriteLine($"                 Estados_Aceptacion.Add({Estados_Aceptacion[i]});");
+                                                }
+                writer.WriteLine("          }");
+
                 writer.WriteLine("          public static void LlenarDiccionarioActions()");
                 writer.WriteLine("          {");
                 foreach (var item in SintacticoA.DiccionarioActions.Keys)
@@ -247,96 +281,6 @@ namespace Proyecto_LFA
                 {
                     writer.WriteLine($"                 Error_List.Add(\"{SintacticoA.ErrorList[i]}\");");
                 }
-                //writer.WriteLine("          public static void Llenar_ListaST()");
-                //writer.WriteLine("          {");
-                //for (int i = 0; i < Form1.st_SINTACTICO.Count; i++)
-                //{
-                //    writer.WriteLine($"                 Simbolos_T.Add(\"{Form1.st_SINTACTICO[i]}\");");
-                //}
-                writer.WriteLine("          }");
-                writer.WriteLine("          public static bool BuscarCadena_DiccionarioActions(string tmp)");
-                writer.WriteLine("          {");
-                writer.WriteLine("              var bandera = false;");
-                writer.WriteLine("              foreach (var item in Diccionario_actions.Keys)");
-                writer.WriteLine("              {");
-                writer.WriteLine("                  if(tmp == Diccionario_actions[item])");
-                writer.WriteLine("                  {");
-                writer.WriteLine("                      Console.WriteLine($\"{tmp} = {item}\");");
-                writer.WriteLine("                      bandera = true;");
-                writer.WriteLine("                  }");
-                writer.WriteLine("              }");
-                writer.WriteLine("              return bandera;");
-                writer.WriteLine("          }");
-                writer.WriteLine("          public static bool IgualarCadena_DefinicionTokens(string cadena)//Primer filtro para ver si es una definicion exacta");
-                writer.WriteLine("          {");
-                writer.WriteLine("              var bandera = false;");
-                writer.WriteLine("              foreach (var item in Definicion_Tokens.Keys)");
-                writer.WriteLine("              {");
-                writer.WriteLine("                  if(cadena == Definicion_Tokens[item])");
-                writer.WriteLine("                  {");
-                writer.WriteLine("                      var numeroToken = item.Split(' ');");
-                writer.WriteLine("                      Console.WriteLine($\"{cadena} = {numeroToken[1].Trim(' ')}\");");
-                writer.WriteLine("                      bandera = true;");
-                writer.WriteLine("                  }");
-                writer.WriteLine("              }");
-                writer.WriteLine("              return bandera;");
-                writer.WriteLine("          }");
-                //writer.WriteLine("          public static string DevolverCadena_enFormaSETS(string cadena)");
-                //writer.WriteLine("          {");
-                //writer.WriteLine("              var cadenaSETS = string.Empty;");
-                //writer.WriteLine("              var temp = cadena.ToCharArray();");
-                //writer.WriteLine("              for(int j=0; j < temp.Length; j++)");
-                //writer.WriteLine("              {");
-                //                                for (int i = 0; i < SintacticoA.SetsList.Count; i++)
-                //                                {
-                //                                    if (i == 0)
-                //                                    {
-                //writer.WriteLine($"                    if({DevolverLineaIf(SintacticoA.SetsList[i])}) //Definido para el SET {SintacticoA.SetsList[i]}");
-                //writer.WriteLine("                     {");
-                //writer.WriteLine($"                           if(!cadenaSETS.Contains(\"{SintacticoA.SetsList[i]}\"))");
-                //writer.WriteLine("                          {");
-                //writer.WriteLine($"                              cadenaSETS += (\"{SintacticoA.SetsList[i]}\" );");
-                //writer.WriteLine("                          }");
-                //writer.WriteLine("                     }");
-                //                                    }
-                //                                    else
-                //                                    {
-                //writer.WriteLine($"                    else if({DevolverLineaIf(SintacticoA.SetsList[i])}) //Definido para el SET {SintacticoA.SetsList[i]}");
-                //writer.WriteLine("                     {");
-                //writer.WriteLine($"                           if(!cadenaSETS.Contains(\"{SintacticoA.SetsList[i]}\"))");
-                //writer.WriteLine("                          {");
-                //writer.WriteLine($"                              cadenaSETS+= (\"{SintacticoA.SetsList[i]}\" );");
-                //writer.WriteLine("                          }");
-                //writer.WriteLine("                     }");
-                //                                    }
-                //                                }
-                //writer.WriteLine($"                   else");
-                //writer.WriteLine("                   {");
-                //writer.WriteLine("                     cadenaSETS+= temp[j];");
-                //writer.WriteLine("                   }");
-                //writer.WriteLine("              }");
-                //writer.WriteLine("              return cadenaSETS;");
-                //writer.WriteLine("          }");
-                writer.WriteLine("          public static void ImprimirTokens_ConNuevaCadena(string cadena_Seteada, string cadena)");
-                writer.WriteLine("          {");
-                writer.WriteLine("              var cadena_array = cadena_Seteada.Split(' ');");
-                writer.WriteLine("              foreach (var item in Definicion_Tokens.Keys)");
-                writer.WriteLine("              {");
-                writer.WriteLine("              var contador = 0;");
-                writer.WriteLine("                  for(int i=0; i< cadena_array.Length; i++)");
-                writer.WriteLine("                  {");
-                writer.WriteLine("                      if(Definicion_Tokens[item].Contains(cadena_array[i]))");
-                writer.WriteLine("                      {");
-                writer.WriteLine("                          contador++;");
-                writer.WriteLine("                      }");
-                writer.WriteLine("                  }");
-                writer.WriteLine("                  if(contador == cadena_array.Length) //Es ese TOKEN");
-                writer.WriteLine("                  {");
-                writer.WriteLine("                          var numeroToken = item.Split(' ');");
-                writer.WriteLine("                          Console.WriteLine($\"{cadena} = {numeroToken[1].Trim(' ')}\");");
-                writer.WriteLine("                          break;");
-                writer.WriteLine("                  }");
-                writer.WriteLine("              }");
                 writer.WriteLine("          }");
 
                 writer.WriteLine("      }");
